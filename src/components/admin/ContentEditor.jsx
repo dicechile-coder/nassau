@@ -116,9 +116,9 @@ function LessonPanel({ lesson, readOnly, onSaved }) {
             <label>Minutes<input type="number" min="0" value={f.minutes} onChange={e => set('minutes', e.target.value)} /></label>
             <label>Pass mark %<input type="number" min="0" max="100" value={f.pass_mark} onChange={e => set('pass_mark', e.target.value)} /></label>
           </div>
-          <label>Story video link (YouTube, Vimeo or .mp4)
-            <input value={f.video_url} placeholder="https://vimeo.com/…" onChange={e => set('video_url', e.target.value)} />
-            {!videoOk && <span className="error small">This link is not a YouTube, Vimeo or .mp4 link.</span>}
+          <label>Story video link (Bunny Stream, YouTube, Vimeo or .mp4)
+            <input value={f.video_url} placeholder="https://iframe.mediadelivery.net/embed/…" onChange={e => set('video_url', e.target.value)} />
+            {!videoOk && <span className="error small">This link is not a Bunny Stream, YouTube, Vimeo or .mp4 link.</span>}
           </label>
           <label className="check"><input type="checkbox" checked={f.needs_video} onChange={e => set('needs_video', e.target.checked)} />
             <span>This lesson needs a video (shows as missing until a link is added)</span></label>

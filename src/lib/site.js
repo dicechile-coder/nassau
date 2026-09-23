@@ -4,6 +4,6 @@ export const SITE = {
   name: 'Nassau Academy English',
   legalName: 'Nassau Academy',
   country: 'Curaçao',
-  contactEmail: 'info@nassauacademy.com',
+  contactEmail: 'nassau.curacao@outlook.com',
   legalUpdated: '23 September 2026',
 }
