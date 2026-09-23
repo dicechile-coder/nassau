@@ -30,13 +30,20 @@ export default function Landing() {
   if (!loading && user) return <Navigate to="/learn" replace />
   return (
     <main className="page landing">
-      <section className="hero">
-        <p className="eyebrow">Nassau Academy English · Beta</p>
-        <h1>Speak English with confidence — one clear lesson at a time.</h1>
-        <p className="lead">A self-study course for beginners with story videos, interactive exercises and a personal AI tutor. Made in Curaçao, built for Spanish-speaking learners.</p>
-        <div className="row">
-          <Link to="/signup" className="btn btn-primary">Start Level A1.1 — free in beta</Link>
-          <Link to="/login" className="btn btn-ghost">Sign in</Link>
+      <section className="hero hero-photo">
+        <picture>
+          <source media="(max-width: 700px)" srcSet="/hero-friends-sm.webp" />
+          <img className="hero-img" src="/hero-friends.webp" width="1916" height="821"
+               alt="Four friends — Sofía, Luis, Maya and Jan — walking past Nassau Academy on the waterfront in Curaçao" />
+        </picture>
+        <div className="hero-box">
+          <p className="eyebrow">Nassau Academy English · Beta</p>
+          <h1>Speak English with confidence — one clear lesson at a time.</h1>
+          <p className="lead">A self-study course for beginners with story videos, interactive exercises and a personal AI tutor. Made in Curaçao, built for Spanish-speaking learners.</p>
+          <div className="row">
+            <Link to="/signup" className="btn btn-primary">Start Level A1.1 — free in beta</Link>
+            <Link to="/login" className="btn btn-ghost">Sign in</Link>
+          </div>
         </div>
       </section>
 
