@@ -11,6 +11,7 @@ export default function Header() {
       <nav className="nav">
         {user ? (
           <>
+            <Link to="/learn/progress" className="hide-sm">Progress</Link>
             {isStaff && <Link to="/admin">Admin</Link>}
             <span className="muted hide-sm">{profile?.preferred_name || user.email}</span>
             <button className="btn btn-ghost" onClick={logout}>Log out</button>

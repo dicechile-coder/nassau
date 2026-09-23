@@ -157,3 +157,22 @@ textarea { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px so
 .dots { letter-spacing: 2px; color: var(--primary); }
 .corrections { margin: 0; padding-left: 18px; }
 @media (max-width: 560px) { .rubric-scores { grid-template-columns: 1fr; } }
+
+/* ---------- progress, XP & streaks (Round 5) ---------- */
+.streakbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--border); background: var(--bg); font-size: .9rem; font-weight: 600; }
+.pill-fire { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.streak-note { flex-basis: 100%; }
+.stats-grid { margin: 16px 0; }
+.page > section.card { margin-bottom: 16px; }
+.calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; max-width: 360px; margin: 8px 0 10px; }
+.cal-day { aspect-ratio: 1; border-radius: 6px; background: var(--border); display: grid; place-items: center; font-size: .8rem; }
+.cal-day.on { background: var(--success); }
+.cal-day.freeze { background: color-mix(in srgb, var(--primary) 25%, transparent); }
+.cal-day.today { outline: 2px solid var(--primary); outline-offset: 1px; }
+.xp-rules { margin: 0; padding-left: 1.2em; }
+.search { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); max-width: 360px; }
+.linkish { font: inherit; background: none; border: 0; color: var(--primary); cursor: pointer; padding: 0; text-decoration: underline; }
+.ai-log { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.ai-log li { border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.ai-log p { margin: 4px 0 0; }

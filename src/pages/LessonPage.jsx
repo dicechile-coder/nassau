@@ -7,6 +7,8 @@ import { fill } from '../lib/placeholders.js'
 import { Loading } from '../components/Guards.jsx'
 import StepView from '../components/player/StepView.jsx'
 import { Video } from '../components/Media.jsx'
+import StreakBar from '../components/StreakBar.jsx'
+import { myProgress } from '../lib/progressApi.js'
 
 export default function LessonPage() {
   const { lessonId } = useParams()
@@ -26,6 +28,7 @@ export default function LessonPage() {
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
   const [showEs, setShowEs] = useState(false)
+  const [prog, setProg] = useState(null)
 
   useEffect(() => {
     let alive = true
@@ -97,6 +100,7 @@ export default function LessonPage() {
     try {
       const r = await completeLesson(lesson.id, preview)
       setResult(r); setPhase('result'); window.scrollTo(0, 0)
+      if (!preview) myProgress().then(setProg).catch(() => {})
     } catch (e) { setError(e.message) } finally { setBusy(false) }
   }
 
@@ -159,6 +163,7 @@ export default function LessonPage() {
             </>
           )}
           {!result.preview && result.best_score != null && <p className="muted small">Best score: {result.best_score}%</p>}
+          {!preview && prog && <div className="row center-row"><StreakBar p={prog} compact /></div>}
           <div className="row center-row">
             {wrong.length > 0 && <button className="btn btn-primary" onClick={() => start(wrong.map(w => w.i))}>Practise what I missed</button>}
             {result.passed && nextLesson && !preview && <button className="btn btn-primary" onClick={() => navigate(`/learn/lesson/${nextLesson.id}`)}>Next lesson</button>}

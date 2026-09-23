@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
 import { loadCourse } from '../lib/course.js'
 import { Loading } from '../components/Guards.jsx'
+import StreakBar from '../components/StreakBar.jsx'
+import { myProgress, syncTimezone } from '../lib/progressApi.js'
 
 const stateLabel = { done: 'Done', open: 'Open', locked: 'Locked' }
 
@@ -11,10 +13,13 @@ export default function Hub() {
   const [course, setCourse] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [prog, setProg] = useState(null)
 
   useEffect(() => {
     loadCourse().then(setCourse).catch(e => setError(e.message)).finally(() => setLoading(false))
+    myProgress().then(setProg).catch(() => {})
   }, [])
+  useEffect(() => { if (profile) syncTimezone(profile) }, [profile?.id])
 
   if (loading) return <Loading />
   if (error) return <main className="page"><p className="error">Could not load the course: {error}</p></main>
@@ -26,6 +31,7 @@ export default function Hub() {
       <section className="card hub-top">
         <p className="eyebrow">{course.title}</p>
         <h1 className="h2">Welcome{profile?.preferred_name ? `, ${profile.preferred_name}` : ''}!</h1>
+        <StreakBar p={prog} />
         <div className="progress" aria-label={`${pct}% complete`}><div style={{ width: `${pct}%` }} /></div>
         <p className="muted small">{course.done} of {course.total} lessons completed · {pct}%</p>
         {course.next && (
@@ -33,6 +39,7 @@ export default function Hub() {
             {course.done === 0 ? 'Start' : 'Continue'}: {course.next.title}
           </Link>
         )}
+        <Link className="small" to="/learn/progress">See my progress →</Link>
         {isStaff && <p className="small muted">You are staff: open any lesson in preview from the Admin area.</p>}
       </section>
 
