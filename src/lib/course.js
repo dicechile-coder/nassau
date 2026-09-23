@@ -1,0 +1,36 @@
+import { supabase, COURSE_CODE } from './supabase.js'
+
+// Loads the course with modules and lessons in order, plus each lesson's status
+// from the database's single unlock rule (public.lesson_status).
+export async function loadCourse(code = COURSE_CODE) {
+  const { data: course, error } = await supabase
+    .from('courses')
+    .select('id, code, title, level, description, modules(id, position, title, description, lessons(id, position, title, objective, summary, minutes, is_checkpoint, status))')
+    .eq('code', code)
+    .maybeSingle()
+  if (error) throw error
+  if (!course) return null
+
+  const { data: statuses, error: statusError } = await supabase.rpc('lesson_status', { p_course_code: code })
+  if (statusError) throw statusError
+  const statusById = Object.fromEntries((statuses ?? []).map(s => [s.lesson_id, s]))
+
+  const modules = [...(course.modules ?? [])]
+    .sort((a, b) => a.position - b.position)
+    .map(m => ({
+      ...m,
+      lessons: [...(m.lessons ?? [])]
+        .filter(l => l.status === 'published')
+        .sort((a, b) => a.position - b.position)
+        .map(l => ({
+          ...l,
+          state: statusById[l.id]?.status ?? 'locked',
+          bestScore: statusById[l.id]?.best_score ?? null,
+        })),
+    }))
+
+  const lessons = modules.flatMap(m => m.lessons)
+  const done = lessons.filter(l => l.state === 'done').length
+  const next = lessons.find(l => l.state === 'open') ?? null
+  return { ...course, modules, lessons, done, total: lessons.length, next }
+}
