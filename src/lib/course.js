@@ -5,7 +5,7 @@ import { supabase, COURSE_CODE } from './supabase.js'
 export async function loadCourse(code = COURSE_CODE) {
   const { data: course, error } = await supabase
     .from('courses')
-    .select('id, code, title, level, description, modules(id, position, title, description, lessons(id, position, title, objective, summary, content, content_es, tip, minutes, pass_mark, is_checkpoint, status))')
+    .select('id, code, title, level, description, modules(id, position, title, description, lessons(id, position, title, objective, summary, content, content_es, tip, minutes, pass_mark, is_checkpoint, video_url, status))')
     .eq('code', code)
     .maybeSingle()
   if (error) throw error

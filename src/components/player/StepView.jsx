@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { fill, shuffled, COUNTRIES, suggestedNationality } from '../../lib/placeholders.js'
+import { Audio } from '../Media.jsx'
 
 // Renders one exercise step and calls onSubmit(answer) when the student checks it.
 // `locked` = feedback is showing; inputs are frozen until "Try again" or "Continue".
@@ -9,13 +10,17 @@ export default function StepView({ step, profile, locked, onSubmit, busy }) {
   const f = (t) => fill(t, profile)
   const instruction = f(c.instruction)
   const question = f(c.question)
-  const showQuestion = question && question !== instruction && !/^Model dialogue|^Scene|^Alphabet|^Buttons:|^Show a four-step/.test(question)
+  const showQuestion = question && question !== instruction
+    && !/^Model dialogue|^Scene|^Alphabet|^Buttons:|^Show a four-step/.test(question)
+    && !(c.audio_url && /^Audio/.test(question))
 
   return (
     <div className="step">
       {instruction && <p className="step-instruction">{instruction}</p>}
       {showQuestion && <p className="step-question">{question}</p>}
-      {step.needs_audio && <AudioNote transcript={c.transcript} kind={step.kind} />}
+      {c.audio_url
+        ? <Audio url={c.audio_url} />
+        : step.needs_audio && <AudioNote transcript={c.transcript} kind={step.kind} />}
       <Body step={step} c={c} ad={ad} f={f} profile={profile} locked={locked} onSubmit={onSubmit} busy={busy} />
     </div>
   )
@@ -65,6 +70,7 @@ function Body({ step, c, ad, f, profile, locked, onSubmit, busy }) {
     case 'spelling': return <TextAnswer placeholder="F-E-R-R-Y" locked={locked} onSubmit={onSubmit} busy={busy} />
     case 'nationality': return <Nationality profile={profile} locked={locked} onSubmit={onSubmit} busy={busy} />
     case 'open': return <Open model={f(ad.model)} locked={locked} onSubmit={onSubmit} busy={busy} />
+    case 'h5p': return <H5P c={c} locked={locked} onSubmit={onSubmit} busy={busy} />
     case 'ai': return <AiPractice c={c} ad={ad} f={f} locked={locked} onSubmit={onSubmit} busy={busy} />
     default: return <Info c={c} ad={ad} f={f} locked={locked} onSubmit={onSubmit} busy={busy} />
   }
@@ -248,6 +254,18 @@ function Info({ c, ad, f, locked, onSubmit, busy }) {
       {c.transcript && <Transcript text={f(c.transcript)} />}
       {ad.kind === 'completion' && <p className="notice">{f(c.question)}</p>}
       {!locked && <SubmitButton busy={busy} label="Continue" />}
+    </form>
+  )
+}
+
+function H5P({ c, locked, onSubmit, busy }) {
+  if (!c.h5p_url) return <p className="notice">This activity is not ready yet.</p>
+  return (
+    <form onSubmit={e => { e.preventDefault(); onSubmit({ seen: true }) }} className="stack">
+      <div className="h5p-frame">
+        <iframe title="Interactive activity" src={c.h5p_url} style={{ height: c.height || 500 }} allowFullScreen loading="lazy" />
+      </div>
+      {!locked && <SubmitButton busy={busy} label="Done — continue" />}
     </form>
   )
 }

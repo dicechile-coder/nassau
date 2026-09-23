@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../lib/auth.jsx'
-import { loadCourse } from '../lib/course.js'
+import ContentEditor from '../components/admin/ContentEditor.jsx'
 
 const TABS = ['Overview', 'Content', 'Students', 'AI settings']
 
 export default function Admin() {
   const [tab, setTab] = useState('Overview')
   return (
-    <main className="page">
+    <main className="page wide">
       <h1 className="h2">Admin</h1>
       <div className="tabs" role="tablist">
         {TABS.map(t => (
@@ -17,7 +16,7 @@ export default function Admin() {
         ))}
       </div>
       {tab === 'Overview' && <Overview />}
-      {tab === 'Content' && <Content />}
+      {tab === 'Content' && <ContentEditor />}
       {tab === 'Students' && <Students />}
       {tab === 'AI settings' && <AiSettings />}
     </main>
@@ -28,16 +27,21 @@ function Overview() {
   const [stats, setStats] = useState(null)
   useEffect(() => {
     (async () => {
-      const [lessons, students, ai] = await Promise.all([
+      const [lessons, students, ai, steps] = await Promise.all([
         supabase.from('lessons').select('id, status, needs_video, video_url'),
         supabase.from('profiles').select('id, role'),
         supabase.from('app_settings').select('value').eq('key', 'ai').maybeSingle(),
+        supabase.from('steps').select('id, status, needs_audio, audio:content->>audio_url'),
       ])
+      const st = steps.data ?? []
       const ls = lessons.data ?? []
       setStats({
         lessons: ls.length,
         published: ls.filter(l => l.status === 'published').length,
         missingVideo: ls.filter(l => l.needs_video && !l.video_url).length,
+        exercises: st.length,
+        drafts: st.filter(x => x.status !== 'published').length,
+        missingAudio: st.filter(x => x.needs_audio && !x.audio).length,
         students: (students.data ?? []).filter(p => p.role === 'student').length,
         ai: ai.data?.value,
       })
@@ -49,7 +53,10 @@ function Overview() {
     <div className="grid">
       <Stat label="Lessons" value={stats.lessons} />
       <Stat label="Published" value={stats.published} />
+      <Stat label="Exercises" value={stats.exercises} />
+      <Stat label="Draft exercises" value={stats.drafts} />
       <Stat label="Missing video" value={stats.missingVideo} />
+      <Stat label="Missing audio" value={stats.missingAudio} />
       <Stat label="Students" value={stats.students} />
       <Stat label="AI model" value={stats.ai?.model ?? '—'} small />
       <Stat label="AI connection" value={t ? (t.ok ? 'OK' : 'Failed') : 'Not tested'} small />
@@ -59,35 +66,6 @@ function Overview() {
 
 function Stat({ label, value, small }) {
   return <div className="card stat"><div className="muted small">{label}</div><div className={small ? 'stat-small' : 'stat-value'}>{value}</div></div>
-}
-
-function Content() {
-  const [course, setCourse] = useState(null)
-  useEffect(() => { loadCourse().then(setCourse) }, [])
-  if (!course) return <p className="muted">Loading…</p>
-  return (
-    <div>
-      <p className="muted small">Editing arrives in Round 3. Use Preview to open any lesson without changing progress.</p>
-      {course.modules.map(m => (
-        <section key={m.id} className="module">
-          <h2 className="h3">Module {m.position} · {m.title}</h2>
-          <table className="table">
-            <thead><tr><th>#</th><th>Lesson</th><th>Minutes</th><th></th></tr></thead>
-            <tbody>
-              {m.lessons.map(l => (
-                <tr key={l.id}>
-                  <td>{l.position}</td>
-                  <td>{l.title}{l.is_checkpoint ? ' (checkpoint)' : ''}</td>
-                  <td>{l.minutes ?? '—'}</td>
-                  <td><Link to={`/learn/lesson/${l.id}?preview=1`}>Preview</Link></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      ))}
-    </div>
-  )
 }
 
 function Students() {

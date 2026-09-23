@@ -6,6 +6,7 @@ import { getLessonSteps, checkStep, completeLesson } from '../lib/lessonApi.js'
 import { fill } from '../lib/placeholders.js'
 import { Loading } from '../components/Guards.jsx'
 import StepView from '../components/player/StepView.jsx'
+import { Video } from '../components/Media.jsx'
 
 export default function LessonPage() {
   const { lessonId } = useParams()
@@ -116,7 +117,7 @@ export default function LessonPage() {
           <p className="eyebrow">{course.title}</p>
           <h1 className="h2">{lesson.title}</h1>
           {lesson.objective && <p><strong>By the end of this lesson, you can…</strong><br />{lesson.objective.replace(/^After this lesson, you can /i, '')}</p>}
-          <div className="video-placeholder" aria-label="Story video">🎬 Story video coming soon</div>
+          <Video url={lesson.video_url} title={lesson.title} />
           {lesson.content && <p>{lesson.content}</p>}
           {lesson.content_es && (
             <div>
