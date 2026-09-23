@@ -49,13 +49,13 @@ export default function LessonPage() {
     return course.lessons[i + 1] ?? null
   }, [course, lesson])
 
-  if (error) return <main className="page narrow"><p className="error">{error}</p><Link to="/learn">Back to the hub</Link></main>
+  if (error) return <main className="page"><p className="error">{error}</p><Link to="/learn">Back to the hub</Link></main>
   if (!course) return <Loading />
-  if (!lesson) return <main className="page narrow"><h1 className="h2">Lesson not found</h1><Link to="/learn">Back to the hub</Link></main>
+  if (!lesson) return <main className="page"><h1 className="h2">Lesson not found</h1><Link to="/learn">Back to the hub</Link></main>
 
   if (lesson.state === 'locked' && !preview) {
     return (
-      <main className="page narrow">
+      <main className="page">
         <div className="card">
           <h1 className="h2">This lesson is still locked</h1>
           <p>Pass the previous lesson with at least {lesson.pass_mark ?? 70}% to unlock it.</p>
@@ -77,13 +77,14 @@ export default function LessonPage() {
 
   const current = phase === 'play' ? steps[queue[pos]] : null
 
-  const submit = async (answer) => {
+  const submit = async (answer, preset = null) => {
     setBusy(true); setError('')
     try {
-      const r = await checkStep(current.id, answer, preview)
+      // AI steps are marked by the AI function (preset); skipped role-plays still count as seen
+      const r = preset ?? await checkStep(current.id, answer, preview)
       setFeedback(r)
       if (['personal', 'spelling', 'nationality'].includes(current.kind) && !preview) await refreshProfile()
-      setSteps(list => list.map(s => (s.id === current.id ? { ...s, result: { correct: r.correct, tries: r.tries } } : s)))
+      setSteps(list => list.map(s => (s.id === current.id ? { ...s, result: { correct: r.correct, tries: r.tries ?? (s.result?.tries ?? 0) + 1 } } : s)))
       // Non-scored steps that went fine need no feedback screen
       if (r.correct && !current.gradable && !r.feedback) goNext()
     } catch (e) { setError(e.message) } finally { setBusy(false) }
@@ -111,7 +112,7 @@ export default function LessonPage() {
 
   if (phase === 'intro') {
     return (
-      <main className="page narrow">
+      <main className="page">
         {header}
         <div className="card stack">
           <p className="eyebrow">{course.title}</p>
@@ -141,7 +142,7 @@ export default function LessonPage() {
   if (phase === 'result' && result) {
     const wrong = steps.map((s, i) => ({ s, i })).filter(({ s }) => result.wrong_steps?.includes(s.id))
     return (
-      <main className="page narrow">
+      <main className="page">
         {header}
         <div className="card stack center-text">
           <p className="eyebrow">{lesson.title}</p>
@@ -170,7 +171,7 @@ export default function LessonPage() {
 
   // play
   return (
-    <main className="page narrow">
+    <main className="page">
       {header}
       <div className="player-top">
         <span className="small muted">{lesson.title}</span>
@@ -180,13 +181,14 @@ export default function LessonPage() {
       <div className="card">
         {current && (
           <StepView key={`${current.id}-${attemptKey}`} step={current} profile={profile}
-            locked={!!feedback} busy={busy} onSubmit={submit} />
+            locked={!!feedback} busy={busy} onSubmit={submit} preview={preview} attempt={attemptKey} />
         )}
         {error && <p className="error">{error}</p>}
         {feedback && (
           <div className={`feedback ${feedback.correct ? 'ok' : 'no'}`} role="status">
-            <p className="feedback-title">{feedback.correct ? (current.gradable ? 'Correct!' : 'Saved.') : feedback.final ? 'Not quite.' : 'Not quite — try once more.'}</p>
+            <p className="feedback-title">{feedback.scores ? (feedback.correct ? `Well done! ${feedback.total}/8` : `${feedback.total}/8 — you need 5 to pass`) : feedback.correct ? (current.gradable ? 'Correct!' : 'Saved.') : feedback.final ? 'Not quite.' : 'Not quite — try once more.'}</p>
             {feedback.feedback && <p>{fill(feedback.feedback, profile)}</p>}
+            {feedback.scores && <Rubric r={feedback} />}
             {feedback.explanation && <p className="small">{feedback.explanation}</p>}
             {feedback.explanation_es && <details className="small"><summary>En español</summary><p>{feedback.explanation_es}</p></details>}
             <div className="row">
@@ -198,5 +200,25 @@ export default function LessonPage() {
         )}
       </div>
     </main>
+  )
+}
+
+const CRITERIA = [['task', 'Task done'], ['target', 'Lesson target'], ['words', 'Words & spelling'], ['communication', 'Clear message']]
+
+function Rubric({ r }) {
+  return (
+    <div className="rubric">
+      <ul className="rubric-scores">
+        {CRITERIA.map(([k, label]) => <li key={k}><span>{label}</span><span className="dots">{'●'.repeat(r.scores[k])}{'○'.repeat(2 - r.scores[k])}</span></li>)}
+      </ul>
+      {r.strength && <p><strong>Good:</strong> {r.strength}</p>}
+      {r.corrections?.length > 0 && (
+        <ul className="corrections">
+          {r.corrections.map((x, i) => <li key={i}><s>{x.wrong}</s> → <strong>{x.right}</strong>{x.why ? <span className="small muted"> — {x.why}</span> : null}</li>)}
+        </ul>
+      )}
+      {r.hint_es && <p className="small es">💬 {r.hint_es}</p>}
+      {r.level_flag && <p className="small notice">This looks above beginner level. Please write it again with the words from this lesson.</p>}
+    </div>
   )
 }

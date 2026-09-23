@@ -59,7 +59,8 @@ export const NEW_STEP_TYPES = [
   { type: 'sequence_order', label: 'Put lines in order', content: { instruction: 'Put the conversation in a natural order.', question: '', answer_data: { kind: 'sequence_order', items: [{ id: 'A', text: 'First line' }, { id: 'B', text: 'Second line' }], correctOrder: ['A', 'B'] } } },
   { type: 'model_dialogue', label: 'Dialogue / text to read or hear', content: { instruction: 'Listen and read.', transcript: 'Maya: Hello!\nLuis: Hi!', answer_data: { kind: 'model_dialogue' } } },
   { type: 'personalized_input', label: 'Personal answer (name, country)', content: { instruction: 'Type your answer.', question: '', answer_data: { kind: 'personalized_input', store: '' } } },
-  { type: 'exit_ticket', label: 'Open writing task', content: { instruction: 'Write your answer.', question: '', answer_data: { kind: 'exit_ticket', model: '' } } },
+  { type: 'writing_task', label: 'Writing task (AI-marked, scored)', content: { instruction: 'Write a short message.', task: 'Write 3–4 sentences.', variations: ['Situation 1', 'Situation 2', 'Situation 3'], required: [], target: '', min_words: 15, answer_data: { kind: 'writing_task', model: '' } } },
+  { type: 'exit_ticket', label: 'Open writing (AI feedback, not scored)', content: { instruction: 'Write your answer.', question: '', answer_data: { kind: 'exit_ticket', model: '' } } },
   { type: 'h5p', label: 'H5P activity (embed)', content: { instruction: 'Do the activity below, then continue.', question: '', h5p_url: '', height: 500 } },
   { type: 'ai_roleplay', label: 'AI role-play', content: { instruction: 'Talk with the tutor.', question: '', answer_data: { kind: 'ai_roleplay', persona: 'Nate', script: [{ role: 'tutor', text: 'Hello!' }] } } },
 ]
@@ -76,6 +77,7 @@ export const TYPE_GROUPS = {
   ai: ['ai_roleplay', 'ai_conversation', 'speak_or_type', 'final_mission'],
   info: ['model_dialogue'],
   h5p: ['h5p'],
+  writing: ['writing_task'],
 }
 
 export function typeGroup(type) {

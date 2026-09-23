@@ -193,6 +193,23 @@ function AnswerEditor({ group, type, c, ad, set, setAd }) {
       </>
     )
   }
+  if (group === 'writing') {
+    return (
+      <>
+        <label>Task (what the student must write)<textarea rows={2} value={c.task ?? ''} onChange={e => set('task', e.target.value)} /></label>
+        <label>Situations — one per line; each student gets a different one, and “Try again” gives a new one
+          <textarea rows={5} value={(c.variations || []).join('\n')} onChange={e => set('variations', e.target.value.split('\n').map(x => x.trim()).filter(Boolean))} />
+        </label>
+        <label>Must include (one per line, optional)<textarea rows={3} value={(c.required || []).join('\n')} onChange={e => set('required', e.target.value.split('\n').map(x => x.trim()).filter(Boolean))} /></label>
+        <div className="grid-2">
+          <label>Lesson target the AI checks<input value={c.target ?? ''} placeholder="e.g. possessive adjectives his / her" onChange={e => set('target', e.target.value)} /></label>
+          <label>Minimum words<input type="number" min="0" value={c.min_words ?? 0} onChange={e => set('min_words', Number(e.target.value))} /></label>
+        </div>
+        <label>Example answer shown to the student (optional)<input value={ad.model ?? ''} onChange={e => setAd('model', e.target.value)} /></label>
+        <p className="hint">Marked by the AI with the A1 rubric (4 criteria × 0–2). Pass = 5 of 8. Counts towards the lesson score.</p>
+      </>
+    )
+  }
   if (group === 'h5p') {
     return (
       <>
@@ -219,6 +236,7 @@ function validate(type, group, c) {
   }
   if (group === 'order' && !(c.answer_data?.accept || []).length) return 'Add at least one accepted sentence.'
   if (group === 'reorder' && !(c.correct_answer || '').trim()) return 'Add the correct sentence.'
+  if (group === 'writing' && !(c.task || '').trim()) return 'Add the task text.'
   if (group === 'h5p' && !extractEmbedUrl(c.h5p_url)) return 'Paste a valid H5P embed code or https link.'
   if (group === 'fill' && !c.answer_data?.bothPreferredName && !(c.answer_data?.answers || []).length) return 'Add the correct answers.'
   if (group === 'sort' && (c.answer_data?.items || []).some(i => !(c.answer_data?.groups || []).includes(i.group))) return 'Every item needs a group from the group list.'

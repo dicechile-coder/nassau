@@ -45,7 +45,7 @@ begin
       'text', coalesce(st.content->'answer_data'->'accept'->>0, st.content->>'correct_answer', 'Test'),
       'blanks', coalesce(st.content->'answer_data'->'answers', '["Test","Test"]'::jsonb),
       'order', st.content->'answer_data'->'correctOrder',
-      'groups', (select jsonb_object_agg(i->>'word', i->>'group') from jsonb_array_elements(st.content->'answer_data'->'items') i)));
+      'groups', (select jsonb_object_agg(i->>'word', i->>'group') from jsonb_array_elements(st.content->'answer_data'->'items') i where i ? 'word')));
   end loop;
   r := public.complete_lesson(l1);
   if not (r->>'passed')::boolean then raise exception 'FAIL: all-correct attempt did not pass: %', r; end if;

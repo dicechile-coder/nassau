@@ -139,3 +139,21 @@ textarea { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px so
 .h5p-frame { width: 100%; }
 .h5p-frame iframe { width: 100%; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
 .wide { max-width: 1200px; }
+
+/* ---------- AI steps (Round 4) ---------- */
+.chat { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; padding: 4px; }
+.bubble { max-width: 85%; padding: 10px 12px; border-radius: 14px; display: flex; flex-direction: column; gap: 4px; }
+.bubble.tutor { align-self: flex-start; background: var(--bg); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.bubble.student { align-self: flex-end; background: color-mix(in srgb, var(--primary) 16%, transparent); border-bottom-right-radius: 4px; }
+.bubble .who { font-size: .75rem; font-weight: 700; color: var(--muted); }
+.bubble.typing { color: var(--muted); font-style: italic; }
+.tip-inline { font-size: .88rem; background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 8px; padding: 4px 8px; }
+.chat-input { display: flex; gap: 8px; }
+.chat-input input { flex: 1; font: inherit; padding: 10px 12px; min-height: 44px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+.variation { background: color-mix(in srgb, var(--primary) 8%, transparent); border-radius: 8px; padding: 10px 12px; margin: 0; }
+.rubric { display: flex; flex-direction: column; gap: 6px; }
+.rubric-scores { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+.rubric-scores li { display: flex; justify-content: space-between; font-size: .92rem; }
+.dots { letter-spacing: 2px; color: var(--primary); }
+.corrections { margin: 0; padding-left: 18px; }
+@media (max-width: 560px) { .rubric-scores { grid-template-columns: 1fr; } }
