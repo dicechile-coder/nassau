@@ -150,7 +150,7 @@ export default function LessonPage() {
           {result.passed ? (
             <>
               <h1 className="h2">Well done{profile?.preferred_name ? `, ${profile.preferred_name}` : ''}!</h1>
-              <p>You passed this lesson.{nextLesson ? ' The next lesson is now open.' : ''}</p>
+              <p>You passed this lesson.{preview ? ' (Preview: nothing was saved or unlocked.)' : nextLesson ? ' The next lesson is now open.' : ''}</p>
             </>
           ) : (
             <>
@@ -162,6 +162,7 @@ export default function LessonPage() {
           <div className="row center-row">
             {wrong.length > 0 && <button className="btn btn-primary" onClick={() => start(wrong.map(w => w.i))}>Practise what I missed</button>}
             {result.passed && nextLesson && !preview && <button className="btn btn-primary" onClick={() => navigate(`/learn/lesson/${nextLesson.id}`)}>Next lesson</button>}
+            {preview && nextLesson && <button className="btn btn-primary" onClick={() => navigate(`/learn/lesson/${nextLesson.id}?preview=1`)}>Preview next lesson</button>}
             <Link className="btn btn-ghost" to={preview ? '/admin' : '/learn'}>{preview ? 'Back to admin' : 'Back to the hub'}</Link>
           </div>
         </div>
