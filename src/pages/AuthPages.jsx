@@ -84,7 +84,7 @@ export function Signup() {
         <label>Password<input type="password" required autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} />
           <span className="hint">At least 10 characters.</span></label>
         <label className="check"><input type="checkbox" checked={accept} onChange={e => setAccept(e.target.checked)} />
-          <span>I accept the Terms of Use and Privacy Policy.</span></label>
+          <span>I accept the <Link to="/terms" target="_blank">Terms of Use</Link> and <Link to="/privacy" target="_blank">Privacy Policy</Link>.</span></label>
         {error && <p className="error">{error}</p>}
         <button className="btn btn-primary" disabled={busy}>{busy ? 'Creating…' : 'Create my account'}</button>
       </form>

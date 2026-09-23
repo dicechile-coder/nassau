@@ -5,7 +5,7 @@ import ContentEditor from '../components/admin/ContentEditor.jsx'
 import { adminStudents, adminStudentDetail, adminSetAi } from '../lib/progressApi.js'
 import { loadCourse } from '../lib/course.js'
 
-const TABS = ['Overview', 'Content', 'Students', 'AI settings']
+const TABS = ['Overview', 'Health', 'Content', 'Students', 'AI settings']
 
 export default function Admin() {
   const [tab, setTab] = useState('Overview')
@@ -18,6 +18,7 @@ export default function Admin() {
         ))}
       </div>
       {tab === 'Overview' && <Overview />}
+      {tab === 'Health' && <Health />}
       {tab === 'Content' && <ContentEditor />}
       {tab === 'Students' && <Students />}
       {tab === 'AI settings' && <AiSettings />}
@@ -62,6 +63,63 @@ function Overview() {
       <Stat label="Students" value={stats.students} />
       <Stat label="AI model" value={stats.ai?.model ?? '—'} small />
       <Stat label="AI connection" value={t ? (t.ok ? 'OK' : 'Failed') : 'Not tested'} small />
+    </div>
+  )
+}
+
+function Health() {
+  const [h, setH] = useState(null)
+  const [ms, setMs] = useState(null)
+  const [error, setError] = useState('')
+  const run = async () => {
+    setH(null); setError('')
+    const t0 = performance.now()
+    const { data, error } = await supabase.rpc('health_report')
+    setMs(Math.round(performance.now() - t0))
+    if (error) setError(error.message); else setH(data)
+  }
+  useEffect(() => { run() }, [])
+  if (error) return <p className="error">Health check failed: {error}</p>
+  if (!h) return <p className="muted">Checking…</p>
+  const c = h.content, st = h.students, ai = h.ai
+  const lastTest = ai.last_test
+  const testAge = lastTest ? (Date.now() - new Date(lastTest.at).getTime()) / 86400000 : null
+  const checks = [
+    ['Database', ms < 1500 ? 'ok' : 'warn', `answered in ${ms} ms`],
+    ['AI connection', !lastTest ? 'warn' : !lastTest.ok ? 'bad' : testAge > 7 ? 'warn' : 'ok',
+      lastTest ? `${lastTest.ok ? 'OK' : 'FAILED'} · last tested ${new Date(lastTest.at).toLocaleString()}${testAge > 7 ? ' — test again in AI settings' : ''}` : 'never tested — use AI settings → Test connection'],
+    ['Broken exercises', c.broken_exercises.length ? 'bad' : 'ok', c.broken_exercises.length ? `${c.broken_exercises.length} found (see below)` : 'none'],
+    ['Lessons without exercises', c.empty_lessons.length ? 'bad' : 'ok', c.empty_lessons.length ? c.empty_lessons.join(', ') : 'none'],
+    ['Missing videos', c.missing_video ? 'warn' : 'ok', `${c.missing_video} lesson${c.missing_video === 1 ? '' : 's'}`],
+    ['Missing audio', c.missing_audio ? 'warn' : 'ok', `${c.missing_audio} published exercise${c.missing_audio === 1 ? '' : 's'}`],
+    ['Draft exercises', c.exercises_draft ? 'warn' : 'ok', `${c.exercises_draft} not yet published`],
+    ['Students at AI limit today', ai.students_at_limit_today ? 'warn' : 'ok', String(ai.students_at_limit_today)],
+  ]
+  return (
+    <div className="stack">
+      <div className="card">
+        <ul className="health-list">
+          {checks.map(([label, level, text]) => (
+            <li key={label}><span className={`dot ${level}`} aria-label={level} /><strong>{label}:</strong> <span className="small">{text}</span></li>
+          ))}
+        </ul>
+      </div>
+      <div className="grid">
+        <Stat label="Students" value={st.total} />
+        <Stat label="New (7 days)" value={st.new_7d} />
+        <Stat label="Active (7 days)" value={st.active_7d} />
+        <Stat label="Exercises done (7 days)" value={st.exercises_7d} />
+        <Stat label="Lessons passed (7 days)" value={st.lessons_passed_7d} />
+        <Stat label="AI calls (7 days)" value={ai.calls_7d} />
+        <Stat label="AI tokens (7 days)" value={ai.tokens_7d.toLocaleString()} small />
+      </div>
+      {c.broken_exercises.length > 0 && (
+        <div className="card">
+          <h3 className="h3">Broken exercises</h3>
+          <ul className="small">{c.broken_exercises.map((b, i) => <li key={i}>{b.lesson} · step {b.step} ({b.title}): {b.problem}</li>)}</ul>
+        </div>
+      )}
+      <p className="small muted">Checked {new Date(h.generated_at).toLocaleString()} · <button className="linkish" onClick={run}>Check again</button></p>
     </div>
   )
 }
@@ -114,6 +172,13 @@ function StudentDetail({ student: s, onBack }) {
   const [bonus, setBonus] = useState(s.ai_bonus ?? 0)
   const [unlimited, setUnlimited] = useState(!!s.ai_unlimited)
   const [msg, setMsg] = useState('')
+  const [role, setRole] = useState(s.role)
+  const [roleMsg, setRoleMsg] = useState('')
+  const saveRole = async () => {
+    setRoleMsg('')
+    const { error } = await supabase.from('profiles').update({ role }).eq('id', s.id)
+    setRoleMsg(error ? error.message : 'Saved.')
+  }
   useEffect(() => {
     adminStudentDetail(s.id).then(setD).catch(e => setMsg(e.message))
     loadCourse().then(setCourse).catch(() => {})
@@ -147,6 +212,21 @@ function StudentDetail({ student: s, onBack }) {
           {msg && <span className={msg === 'Saved.' ? 'success' : 'error'}>{msg}</span>}</div>}
         {d && <p className="small muted">AI use, last days: {d.usage.length ? d.usage.map(u => `${u.day} ${u.kind} ${u.count}`).join(' · ') : 'none'}</p>}
       </section>
+
+      {isAdmin && (
+        <section className="card form">
+          <h3 className="h3">Role</h3>
+          <label>Account type
+            <select value={role} onChange={e => setRole(e.target.value)}>
+              <option value="student">Student</option>
+              <option value="checker">Checker (can view everything in Admin, cannot change anything)</option>
+              <option value="admin">Admin (full control)</option>
+            </select>
+          </label>
+          <div className="row"><button className="btn btn-primary" onClick={saveRole} disabled={role === s.role && !roleMsg}>Save role</button>
+            {roleMsg && <span className={roleMsg === 'Saved.' ? 'success' : 'error'}>{roleMsg}</span>}</div>
+        </section>
+      )}
 
       <section className="card">
         <h3 className="h3">Lessons</h3>
