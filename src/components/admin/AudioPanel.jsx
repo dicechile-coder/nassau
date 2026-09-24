@@ -58,7 +58,12 @@ export default function AudioPanel() {
     const sample = lines.flatMap(l => l.lines).find(p => p.speaker === role)?.say?.replace(/<[^>]+>/g, '') || `Hello! I'm ${role}.`
     if (!chosen[role]) return setMsg(`Choose a voice for ${role} first.`)
     setBusyId('test-' + role); setMsg('')
-    try { const d = await tts({ action: 'test', voice_id: chosen[role], text: sample, speed: 0.95 }); play(`data:audio/mpeg;base64,${d.audio}`) }
+    try {
+      const d = await tts({ action: 'test', voice_id: chosen[role], text: sample, speed: 0.95 })
+      // the site's security policy blocks data: audio, so play it as a blob
+      const bytes = Uint8Array.from(atob(d.audio), c => c.charCodeAt(0))
+      play(URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' })))
+    }
     catch (e) { setMsg(e.message) } finally { setBusyId('') }
   }
   const generate = async (id) => {
