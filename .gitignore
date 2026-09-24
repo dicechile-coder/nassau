@@ -2,3 +2,6 @@ node_modules
 dist
 .env
 .env.*
+
+# media lives in ../nassau-media, never in the website code
+character library/
