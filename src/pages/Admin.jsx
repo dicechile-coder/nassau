@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../lib/auth.jsx'
 import ContentEditor from '../components/admin/ContentEditor.jsx'
+import AudioPanel from '../components/admin/AudioPanel.jsx'
 import { adminStudents, adminStudentDetail, adminSetAi } from '../lib/progressApi.js'
 import { loadCourse } from '../lib/course.js'
 
-const TABS = ['Overview', 'Health', 'Content', 'Students', 'AI settings']
+const TABS = ['Overview', 'Health', 'Content', 'Audio', 'Students', 'AI settings']
 
 export default function Admin() {
   const [tab, setTab] = useState('Overview')
@@ -20,6 +21,7 @@ export default function Admin() {
       {tab === 'Overview' && <Overview />}
       {tab === 'Health' && <Health />}
       {tab === 'Content' && <ContentEditor />}
+      {tab === 'Audio' && <AudioPanel />}
       {tab === 'Students' && <Students />}
       {tab === 'AI settings' && <AiSettings />}
     </main>
@@ -71,6 +73,18 @@ function Health() {
   const [h, setH] = useState(null)
   const [ms, setMs] = useState(null)
   const [error, setError] = useState('')
+  const [dl, setDl] = useState(false)
+  const downloadBackup = async () => {
+    setDl(true)
+    const { data, error } = await supabase.rpc('backup_export')
+    setDl(false)
+    if (error) return setError(error.message)
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `nassau-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click(); URL.revokeObjectURL(a.href)
+  }
   const run = async () => {
     setH(null); setError('')
     const t0 = performance.now()
@@ -119,6 +133,11 @@ function Health() {
           <ul className="small">{c.broken_exercises.map((b, i) => <li key={i}>{b.lesson} · step {b.step} ({b.title}): {b.problem}</li>)}</ul>
         </div>
       )}
+      <div className="card">
+        <h3 className="h3">Backup</h3>
+        <p className="small muted">A copy of all course content and student progress is saved inside the database every Monday (the last 8 are kept). Once a month, also download one and keep it in OneDrive → nassau-media → backups.</p>
+        <button className="btn btn-ghost" onClick={downloadBackup} disabled={dl}>{dl ? 'Preparing…' : 'Download backup'}</button>
+      </div>
       <p className="small muted">Checked {new Date(h.generated_at).toLocaleString()} · <button className="linkish" onClick={run}>Check again</button></p>
     </div>
   )

@@ -215,3 +215,5 @@ textarea { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px so
   .hero-photo .hero-img { object-position: center; }
   .hero-box { margin: -48px 12px 0; max-width: none; background: rgba(255, 255, 255, .95); }
 }
+.inline { display: inline-flex; align-items: center; gap: 8px; font-weight: 400; }
+.inline input { min-height: 36px; padding: 4px 8px; }
