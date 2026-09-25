@@ -65,7 +65,10 @@ Deno.serve(async (req) => {
     if (!canOpen) return json({ error: "This lesson is locked" }, 403);
     if (step.status !== "published" && !staff) return json({ error: "Exercise not available" }, 404);
 
-    const { data: lesson } = await admin.from("lessons").select("title, objective, content, tip").eq("id", step.lesson_id).maybeSingle();
+    const { data: lesson } = await admin.from("lessons")
+      .select("title, objective, content, tip, module:modules(course:courses(language))").eq("id", step.lesson_id).maybeSingle();
+    // Course language: "en" (English course) or "nl" (Dutch course). Default English.
+    const lang = (lesson as any)?.module?.course?.language === "nl" ? "nl" : "en";
     const settings = settingsRow?.value ?? {};
     const model = settings.model ?? "google/gemini-2.5-flash";
     const p = { ...profile, preferred_name: profile?.preferred_name || profile?.full_name?.split(" ")[0] || null } as Record<string, string | null>;
@@ -107,7 +110,26 @@ Deno.serve(async (req) => {
           : `- The student should: ${s.kind ?? "answer"}${s.accept?.length ? ` (for example: ${s.accept.slice(0, 3).map(a => `"${a}"`).join(", ")})` : ""}`
       ).join("\n");
       const persona = ad.persona || "Nate";
-      const system = [
+      const formal = ["Peter de Vries", "Oude man"].includes(persona);
+      const system = lang === "nl" ? [
+        `You are ${persona}, a friendly character in a Dutch course for complete beginners (CEFR A1) at Nassau Academy in Curaçao.`,
+        persona === "Peter de Vries" ? `You are meneer De Vries, the Dutch teacher: calm, warm and precise.` : "",
+        `Most students are Spanish speakers from Latin America; some speak English.`,
+        `You are practising a short scene with the student, ${p.preferred_name || "the student"}${p.country ? ` from ${p.country}` : ""}.`,
+        `Lesson: "${lesson?.title ?? ""}". Goal: ${lesson?.objective ?? ""}. Language focus: ${lesson?.content ?? ""}`,
+        lesson?.tip ? `Typical mistake in this lesson: ${lesson.tip}` : "",
+        `Scene plan:\n${script || "- Have a short friendly conversation about the lesson topic."}`,
+        `Rules:`,
+        `- Speak ONLY simple A1 Dutch (standard Dutch, ABN) in "reply". Maximum 2 short sentences. Use only words a beginner knows.`,
+        formal ? `- You are older / the teacher: the student should address you with "u". You address the student with "je/jij".` : `- Use "jij/je" with the student (informal).`,
+        `- Stay in the scene. If the student goes off-topic, gently bring them back.`,
+        `- If the student makes a mistake related to the lesson (word order, verb form, de/het, jij/u…), put ONE short correction in "tip": first the correct Dutch sentence, then a very short explanation in Spanish and English, e.g. "Ik ben 27 jaar. · En neerlandés: ik ben (no: ik heb). · Dutch uses ben for age." Otherwise "tip" is empty.`,
+        `- If the student writes in Spanish or English, reply in simple Dutch and put the Dutch sentence they need in "tip".`,
+        `- Accept small spelling mistakes outside the lesson focus.`,
+        `- Never ask for sensitive personal information (address, phone, passwords).`,
+        `- The scene is "done" when the student has done every part of the scene plan, or after ${MAX_STUDENT_TURNS} student messages. When done, end with a short friendly goodbye in Dutch.`,
+        `Reply ONLY with JSON: {"reply": string, "tip": string, "done": boolean, "goals_met": boolean}`,
+      ].filter(Boolean).join("\n") : [
         `You are ${persona}, a friendly character in an English course for complete beginners (CEFR A1) at Nassau Academy in Curaçao.`,
         `You are practising a short scene with the student, ${p.preferred_name || "the student"}${p.country ? ` from ${p.country}` : ""}.`,
         `Lesson: "${lesson?.title ?? ""}". Goal: ${lesson?.objective ?? ""}. Language focus: ${lesson?.content ?? ""}`,
@@ -138,15 +160,16 @@ Deno.serve(async (req) => {
         c.target ? `Lesson target to check: ${c.target}` : `Lesson focus: ${lesson?.content ?? lesson?.title ?? ""}`,
         c.required?.length ? `Required details: ${c.required.join(", ")}` : "",
       ].filter(Boolean).join("\n");
+      const target = lang === "nl" ? "Dutch" : "English";
       const system = [
-        `You mark short writing tasks for complete beginners (CEFR A1) learning English, most of them Spanish speakers.`,
+        `You mark short writing tasks for complete beginners (CEFR A1) learning ${target}, most of them Spanish speakers.`,
         `Be kind, encouraging and fair for A1. Focus mainly on the lesson target; ignore small errors outside it.`,
         `Rubric, each 0–2 points:`,
         `- task: 0 = most required information missing, 1 = some missing, 2 = all included`,
         `- target: 0 = lesson target not used or always wrong, 1 = used with some errors, 2 = used correctly`,
         `- words: 0 = hard to understand, 1 = some word/spelling errors, 2 = mostly correct for A1`,
         `- communication: 0 = a reader cannot follow it, 1 = understandable with effort, 2 = easy to understand`,
-        `If the answer is empty, not in English, or not about the task, set "no_score": true and give a short "reason".`,
+        `If the answer is empty, not in ${target}, or not about the task, set "no_score": true and give a short "reason".`,
         `If the answer is far above A1 level (likely copied), set "level_flag": true.`,
         `Give one short "strength", at most two "corrections" (lesson target first) with the corrected sentence, and an optional one-line Spanish hint "hint_es".`,
         `Never rewrite the whole text. Use simple English in all feedback.`,
@@ -204,7 +227,7 @@ Deno.serve(async (req) => {
     }
 
     // mark
-    if (out.no_score) return json({ no_score: true, reason: out.reason || "Please answer the task in English.", remaining });
+    if (out.no_score) return json({ no_score: true, reason: out.reason || `Please answer the task in ${lang === "nl" ? "Dutch" : "English"}.`, remaining });
     const s = out.scores ?? {};
     const clamp = (n: unknown) => Math.max(0, Math.min(2, Number(n) || 0));
     const scores = { task: clamp(s.task), target: clamp(s.target), words: clamp(s.words), communication: clamp(s.communication) };

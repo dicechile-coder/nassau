@@ -49,6 +49,8 @@ export default function LessonPage() {
   }, [lessonId, preview])
 
   const lesson = course?.lessons.find(l => l.id === lessonId)
+  const bilingual = course?.language === 'nl'
+  const vocab = Array.isArray(lesson?.vocab) ? lesson.vocab : []
   const nextLesson = useMemo(() => {
     if (!course || !lesson) return null
     const i = course.lessons.findIndex(l => l.id === lesson.id)
@@ -127,13 +129,27 @@ export default function LessonPage() {
           {lesson.objective && <p><strong>By the end of this lesson, you can…</strong><br />{lesson.objective.replace(/^After this lesson, you can /i, '')}</p>}
           <Video url={lesson.video_url} title={lesson.title} />
           {lesson.content && <p>{lesson.content}</p>}
-          {lesson.content_es && (
-            <div>
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowEs(v => !v)}>{showEs ? 'Ocultar español' : 'Ver en español'}</button>
-              {showEs && <p className="muted small es">{lesson.content_es}</p>}
-            </div>
+          {lesson.content_es && (bilingual
+            ? <p className="muted small es">{lesson.content_es}</p>
+            : <div>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowEs(v => !v)}>{showEs ? 'Ocultar español' : 'Ver en español'}</button>
+                {showEs && <p className="muted small es">{lesson.content_es}</p>}
+              </div>
           )}
-          {lesson.tip && <p className="tip"><strong>Spanish-speaker tip:</strong> {lesson.tip}</p>}
+          {bilingual
+            ? (lesson.tip || lesson.tip_es) && (
+                <div className="tip">
+                  {lesson.tip_es && <p className="tip-line"><strong>Consejo:</strong> {lesson.tip_es}</p>}
+                  {lesson.tip && <p className="tip-line"><strong>Tip:</strong> {lesson.tip}</p>}
+                </div>)
+            : lesson.tip && <p className="tip"><strong>Spanish-speaker tip:</strong> {lesson.tip}</p>}
+          {vocab.length > 0 && (
+            <details className="vocab-box">
+              <summary>Palabras de esta lección · Words in this lesson ({vocab.length})</summary>
+              <VocabTable words={vocab} />
+              <Link className="small" to={`/learn/lesson/${lesson.id}/words`}>Descargar PDF · Download PDF</Link>
+            </details>
+          )}
           <p className="muted small">{steps.length} steps{lesson.minutes ? ` · about ${lesson.minutes} minutes` : ''} · pass mark {lesson.pass_mark ?? 70}%</p>
           <div className="row">
             {answered > 0 && answered < steps.length && lesson.state !== 'done'
@@ -166,6 +182,13 @@ export default function LessonPage() {
             </>
           )}
           {!result.preview && result.best_score != null && <p className="muted small">Best score: {result.best_score}%</p>}
+          {result.passed && vocab.length > 0 && (
+            <div className="vocab-box left-text">
+              <h2 className="h3">Palabras de esta lección · Words in this lesson</h2>
+              <VocabTable words={vocab} />
+              <Link className="btn btn-ghost btn-sm" to={`/learn/lesson/${lesson.id}/words`}>Descargar PDF · Download PDF</Link>
+            </div>
+          )}
           {!preview && prog && <div className="row center-row"><StreakBar p={prog} compact /></div>}
           <div className="row center-row">
             {wrong.length > 0 && <button className="btn btn-primary" onClick={() => start(wrong.map(w => w.i))}>Practise what I missed</button>}
@@ -199,7 +222,9 @@ export default function LessonPage() {
             {feedback.feedback && <p>{fill(feedback.feedback, profile)}</p>}
             {feedback.scores && <Rubric r={feedback} />}
             {feedback.explanation && <p className="small">{feedback.explanation}</p>}
-            {feedback.explanation_es && <details className="small"><summary>En español</summary><p>{feedback.explanation_es}</p></details>}
+            {feedback.explanation_es && (bilingual
+              ? <p className="small es">{feedback.explanation_es}</p>
+              : <details className="small"><summary>En español</summary><p>{feedback.explanation_es}</p></details>)}
             <div className="row">
               {!feedback.correct && !feedback.final
                 ? <button className="btn btn-primary" onClick={retry}>Try again</button>
@@ -229,5 +254,15 @@ function Rubric({ r }) {
       {r.hint_es && <p className="small es">💬 {r.hint_es}</p>}
       {r.level_flag && <p className="small notice">This looks above beginner level. Please write it again with the words from this lesson.</p>}
     </div>
+  )
+}
+
+// Word list of a lesson: Dutch (or English) word + English + Spanish.
+export function VocabTable({ words }) {
+  return (
+    <table className="table vocab-table">
+      <thead><tr><th>Nederlands</th><th>English</th><th>Español</th></tr></thead>
+      <tbody>{words.map((w, i) => <tr key={i}><td><strong>{w.nl ?? w.word}</strong></td><td>{w.en}</td><td>{w.es}</td></tr>)}</tbody>
+    </table>
   )
 }

@@ -10,6 +10,7 @@ import Hub from './pages/Hub.jsx'
 import LessonPage from './pages/LessonPage.jsx'
 import Admin from './pages/Admin.jsx'
 import Progress from './pages/Progress.jsx'
+import WordList from './pages/WordList.jsx'
 import { Privacy, Terms } from './pages/Legal.jsx'
 import Footer from './components/Footer.jsx'
 
@@ -54,6 +55,7 @@ function AppShell() {
         <Route path="/learn" element={<RequireAuth><Hub /></RequireAuth>} />
         <Route path="/learn/progress" element={<RequireAuth><Progress /></RequireAuth>} />
         <Route path="/learn/lesson/:lessonId" element={<RequireAuth><LessonPage /></RequireAuth>} />
+        <Route path="/learn/lesson/:lessonId/words" element={<RequireAuth><WordList /></RequireAuth>} />
         <Route path="/admin" element={<RequireStaff><Admin /></RequireStaff>} />
         <Route path="*" element={<main className="page narrow"><h1>Page not found</h1><p><a href="/">Go to the home page</a></p></main>} />
       </Routes>

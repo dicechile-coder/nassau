@@ -29,7 +29,7 @@ export async function courseCodeForLesson(lessonId) {
 export async function loadCourse(code = currentCourseCode()) {
   const { data: course, error } = await supabase
     .from('courses')
-    .select('id, code, title, level, description, language, voice_set, status, modules(id, position, title, description, lessons(id, position, title, objective, summary, content, content_es, tip, minutes, pass_mark, is_checkpoint, video_url, status))')
+    .select('id, code, title, level, description, language, voice_set, status, modules(id, position, title, description, lessons(id, position, title, objective, summary, content, content_es, tip, tip_es, vocab, minutes, pass_mark, is_checkpoint, video_url, status))')
     .eq('code', code)
     .maybeSingle()
   if (error) throw error

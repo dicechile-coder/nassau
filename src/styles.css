@@ -220,3 +220,19 @@ textarea { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px so
 
 /* Course switcher on the learning hub */
 .course-tabs { margin-bottom: 16px; flex-wrap: wrap; }
+
+/* Dutch course: bilingual tips and word lists */
+.tip-line { margin: 0 0 4px; }
+.tip-line:last-child { margin-bottom: 0; }
+.vocab-box { display: flex; flex-direction: column; gap: 10px; }
+.vocab-box summary { cursor: pointer; font-weight: 600; }
+.vocab-table td, .vocab-table th { text-align: left; }
+.left-text { text-align: left; }
+.wordlist-head { display: flex; align-items: center; gap: 16px; margin: 16px 0; }
+@media print {
+  .header, .footer, .no-print { display: none !important; }
+  body { background: #fff; }
+  .wordlist { max-width: none; padding: 0; }
+  .vocab-table { font-size: 12pt; }
+  .vocab-table tr { break-inside: avoid; }
+}
