@@ -260,12 +260,13 @@ export function About() {
       <section className="s-section" style={{ paddingTop: 72 }}>
         <div className="s-wrap">
           <div className="s-teacher">
-            <div className="s-teacher-photo">[Teacher photo]</div>
+            <div className="s-teacher-photo has-img"><img src="/site/teacher.webp" width="760" height="880" loading="lazy" alt="Illustration of Ferry Seegers, founder of Nassau Academy" /></div>
             <div>
               <span className="s-kicker green">Our story</span>
               <h2 className="s-h2" style={{ fontSize: 'clamp(30px, 3.6vw, 44px)' }}>A teacher, not a tech company.</h2>
-              <p className="s-lead">Nassau Academy was founded in Curaçao by [TEACHER NAME], a language teacher with [X] years in the classroom. After years of seeing students forget what they learned between classes, we built a way to keep practising: story episodes, instant feedback and Nate, an AI tutor modelled on the way a good teacher helps.</p>
+              <p className="s-lead">Nassau Academy was founded in Curaçao by Ferry Seegers, a language teacher with 30 years in the classroom. After years of seeing students forget what they learned between classes, we built a way to keep practising: story episodes, instant feedback and Nate, an AI tutor modelled on the way a good teacher helps.</p>
               <p className="s-quote">“My goal is simple: that you can really speak the language.”</p>
+              <span className="s-text">Ferry Seegers, founder and teacher</span>
             </div>
           </div>
         </div>

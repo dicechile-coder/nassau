@@ -86,13 +86,13 @@ export default function Home() {
       <section className="s-section">
         <div className="s-wrap">
           <div className="s-teacher">
-            <div className="s-teacher-photo">[Teacher photo]</div>
+            <div className="s-teacher-photo has-img"><img src="/site/teacher.webp" width="760" height="880" loading="lazy" alt="Illustration of Ferry Seegers, founder of Nassau Academy" /></div>
             <div>
               <span className="s-kicker green">Behind Nassau Academy</span>
               <h2 className="s-h2" style={{ fontSize: 'clamp(32px, 4vw, 48px)' }}>A teacher, not a tech company.</h2>
-              <p className="s-lead">Nassau Academy was founded in Curaçao by [TEACHER NAME], a language teacher with [X] years in the classroom. Every episode, exercise and conversation with Nate is built the way a good teacher helps you: patient, precise and encouraging.</p>
+              <p className="s-lead">Nassau Academy was founded in Curaçao by Ferry Seegers, a language teacher with 30 years in the classroom. Every episode, exercise and conversation with Nate is built the way a good teacher helps you: patient, precise and encouraging.</p>
               <p className="s-quote">“My goal is simple: that you can really speak the language.”</p>
-              <span className="s-text">[TEACHER NAME], founder and teacher</span>
+              <span className="s-text">Ferry Seegers, founder and teacher</span>
             </div>
           </div>
         </div>
