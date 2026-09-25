@@ -39,7 +39,16 @@ export function RolePlay({ step, c = {}, ad, f, lang, preview, onDone, onSkip })
   // a student turn "counts" when the tutor answered it without a correction tip
   const reached = messages.filter((m, i) => m.role === 'tutor' && i > 0 && !m.tip).length
   const progress = done ? goals : Math.min(reached, goals)
-  const chips = !busy && !done && !limit ? (expects[Math.min(reached, expects.length - 1)]?.accept || []).slice(0, 3) : []
+  // example answers from the script, tidied for display: fill {name}, capital first letter, "i" → "I",
+  // and "…" after an unfinished English fragment ("I wake up at …")
+  const tidy = (a) => {
+    let t = f(String(a)).trim().replace(/\bi\b/g, 'I')
+    t = t.charAt(0).toUpperCase() + t.slice(1)
+    if (lang !== 'nl' && /[a-z]$/i.test(t)) t += ' …'
+    return t
+  }
+  const chips = !busy && !done && !limit
+    ? [...new Set((expects[Math.min(reached, expects.length - 1)]?.accept || []).map(tidy))].filter(Boolean).slice(0, 3) : []
   const instruction = f(c.instruction || '')
 
   useEffect(() => {
