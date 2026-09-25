@@ -12,6 +12,7 @@ export function Privacy() {
 
       <h2 className="h3">What we collect</h2>
       <ul>
+        <li><strong>Website messages:</strong> your name, email address and message when you use the contact or placement form on our website. We only use these to answer you.</li>
         <li><strong>Account data:</strong> your name, email address and password (the password is stored encrypted; we cannot read it).</li>
         <li><strong>Profile answers:</strong> what you enter in the course, such as the name you prefer, your country and nationality.</li>
         <li><strong>Learning data:</strong> your answers, scores, lesson progress, XP, streak and the days you practised.</li>
@@ -36,7 +37,7 @@ export function Privacy() {
         <li><strong>Supabase</strong> — database, login and server functions.</li>
         <li><strong>Hostinger</strong> — hosting of the website.</li>
         <li><strong>OpenRouter / Google</strong> — AI replies and feedback (only the text of the AI exercises).</li>
-        <li><strong>YouTube / Vimeo</strong> — lesson videos (embedded in privacy-enhanced mode where possible).</li>
+        <li><strong>Bunny.net (Bunny Stream)</strong> — streaming of the lesson videos.</li>
       </ul>
       <p>These providers may process data outside {SITE.country}. They only process it to provide their service to us.</p>
 

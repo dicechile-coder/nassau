@@ -6,7 +6,7 @@ import AudioPanel from '../components/admin/AudioPanel.jsx'
 import { adminStudents, adminStudentDetail, adminSetAi } from '../lib/progressApi.js'
 import { loadCourse } from '../lib/course.js'
 
-const TABS = ['Overview', 'Health', 'Content', 'Audio', 'Students', 'AI settings']
+const TABS = ['Overview', 'Health', 'Content', 'Audio', 'Students', 'Messages', 'AI settings']
 
 export default function Admin() {
   const [tab, setTab] = useState('Overview')
@@ -23,6 +23,7 @@ export default function Admin() {
       {tab === 'Content' && <ContentEditor />}
       {tab === 'Audio' && <AudioPanel />}
       {tab === 'Students' && <Students />}
+      {tab === 'Messages' && <Messages />}
       {tab === 'AI settings' && <AiSettings />}
     </main>
   )
@@ -346,6 +347,44 @@ function AiSettings() {
         Last test: {t ? `${t.ok ? 'OK' : 'Failed'} · ${t.model} · ${new Date(t.at).toLocaleString()} · ${t.message}` : 'never'}
       </p>
       <p className="small muted">The API key is stored as a secret in Supabase and is never shown here.</p>
+    </div>
+  )
+}
+
+// Messages sent through the website's contact and placement forms (table site_messages).
+function Messages() {
+  const [rows, setRows] = useState(null)
+  const [error, setError] = useState('')
+  const [showDone, setShowDone] = useState(false)
+  const load = () => supabase.from('site_messages').select('*').order('created_at', { ascending: false }).limit(300)
+    .then(({ data, error }) => error ? setError(error.message) : setRows(data))
+  useEffect(() => { load() }, [])
+  const toggle = async (r) => {
+    const { error } = await supabase.from('site_messages').update({ handled: !r.handled }).eq('id', r.id)
+    if (error) setError(error.message); else load()
+  }
+  if (error) return <p className="error">{error}</p>
+  if (!rows) return <p className="muted">Loading…</p>
+  const open = rows.filter(r => !r.handled)
+  const list = showDone ? rows : open
+  const LANG = { dutch: 'Dutch', nt2: 'Dutch NT2', naturalization: 'Naturalization', english: 'English', spanish: 'Spanish' }
+  return (
+    <div className="stack">
+      <p className="small muted">{open.length} open · {rows.length - open.length} handled. Reply by email; then mark as handled.</p>
+      <label className="small"><input type="checkbox" checked={showDone} onChange={e => setShowDone(e.target.checked)} /> Show handled messages too</label>
+      {list.length === 0 && <p className="muted">No open messages.</p>}
+      {list.map(r => (
+        <div key={r.id} className="card" style={{ opacity: r.handled ? 0.6 : 1 }}>
+          <div className="row" style={{ justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <strong>{r.kind === 'placement' ? 'Placement talk' : 'Contact'} · {r.name}</strong>
+            <span className="small muted">{new Date(r.created_at).toLocaleString()}</span>
+          </div>
+          <p className="small"><a href={`mailto:${r.email}?subject=${encodeURIComponent('Nassau Academy')}`}>{r.email}</a>
+            {r.language && <> · {LANG[r.language] || r.language}</>}{r.format && <> · {r.format === 'online' ? 'Online' : 'In person'}</>}</p>
+          {r.message && <p style={{ whiteSpace: 'pre-wrap' }}>{r.message}</p>}
+          <button className="btn btn-ghost btn-sm" onClick={() => toggle(r)}>{r.handled ? 'Mark as open' : 'Mark as handled'}</button>
+        </div>
+      ))}
     </div>
   )
 }
