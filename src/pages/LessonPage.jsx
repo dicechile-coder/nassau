@@ -213,7 +213,7 @@ export default function LessonPage() {
       <div className="card">
         {current && (
           <StepView key={`${current.id}-${attemptKey}`} step={current} profile={profile}
-            locked={!!feedback} busy={busy} onSubmit={submit} preview={preview} attempt={attemptKey} />
+            locked={!!feedback} busy={busy} onSubmit={submit} preview={preview} attempt={attemptKey} lang={course?.language || 'en'} />
         )}
         {error && <p className="error">{error}</p>}
         {feedback && (

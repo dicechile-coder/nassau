@@ -5,7 +5,7 @@ import { RolePlay, Writing } from './AiSteps.jsx'
 
 // Renders one exercise step and calls onSubmit(answer) when the student checks it.
 // `locked` = feedback is showing; inputs are frozen until "Try again" or "Continue".
-export default function StepView({ step, profile, locked, onSubmit, busy, preview, attempt = 0 }) {
+export default function StepView({ step, profile, locked, onSubmit, busy, preview, attempt = 0, lang = 'en' }) {
   const c = step.content || {}
   const ad = c.answer_data || {}
   const f = (t) => fill(t, profile)
@@ -17,12 +17,12 @@ export default function StepView({ step, profile, locked, onSubmit, busy, previe
 
   return (
     <div className="step">
-      {instruction && <p className="step-instruction">{instruction}</p>}
-      {showQuestion && <p className="step-question">{question}</p>}
+      {instruction && !(step.kind === 'ai' && !locked) && <p className="step-instruction">{instruction}</p>}
+      {showQuestion && !(step.kind === 'ai' && !locked) && <p className="step-question">{question}</p>}
       {c.audio_url
         ? <Audio url={c.audio_url} />
         : step.needs_audio && <AudioNote transcript={c.transcript} kind={step.kind} />}
-      <Body step={step} c={c} ad={ad} f={f} profile={profile} locked={locked} onSubmit={onSubmit} busy={busy} preview={preview} attempt={attempt} />
+      <Body step={step} c={c} ad={ad} f={f} profile={profile} locked={locked} onSubmit={onSubmit} busy={busy} preview={preview} attempt={attempt} lang={lang} />
     </div>
   )
 }
@@ -60,11 +60,11 @@ function SubmitButton({ disabled, busy, label = 'Check' }) {
   return <button className="btn btn-primary" disabled={disabled || busy}>{busy ? 'Checking…' : label}</button>
 }
 
-function Body({ step, c, ad, f, profile, locked, onSubmit, busy, preview, attempt }) {
+function Body({ step, c, ad, f, profile, locked, onSubmit, busy, preview, attempt, lang }) {
   const skip = () => onSubmit({ skipped: true, practice: true }, step.kind === 'writing'
     ? { correct: false, final: true, feedback: 'Skipped — you can come back to this exercise later.' } : null)
   if (step.kind === 'ai' && !locked) {
-    return <RolePlay step={step} ad={ad} f={f} preview={preview} onDone={r => onSubmit({ conversation: true }, r)} onSkip={skip} />
+    return <RolePlay step={step} c={c} ad={ad} f={f} lang={lang} preview={preview} onDone={r => onSubmit({ conversation: true }, r)} onSkip={skip} />
   }
   if ((step.kind === 'writing' || step.kind === 'open') && !locked) {
     return <Writing step={step} c={c} ad={ad} f={f} preview={preview} attempt={attempt} onMarked={r => onSubmit({ text: true }, r)} onSkip={skip} />
