@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { loadCourse } from '../lib/course.js'
+import { loadCourse, courseCodeForLesson, setCurrentCourse } from '../lib/course.js'
 import { getLessonSteps, checkStep, completeLesson } from '../lib/lessonApi.js'
 import { fill } from '../lib/placeholders.js'
 import { Loading } from '../components/Guards.jsx'
@@ -33,7 +33,10 @@ export default function LessonPage() {
   useEffect(() => {
     let alive = true
     setCourse(null); setSteps(null); setPhase('intro'); setResult(null); setError('')
-    loadCourse().then(async (c) => {
+    courseCodeForLesson(lessonId).then(code => {
+      if (code) setCurrentCourse(code)
+      return loadCourse(code || undefined)
+    }).then(async (c) => {
       if (!alive) return
       setCourse(c)
       const lesson = c?.lessons.find(l => l.id === lessonId)

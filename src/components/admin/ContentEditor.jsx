@@ -6,17 +6,21 @@ import {
 } from '../../lib/adminApi.js'
 import { videoEmbedUrl } from '../Media.jsx'
 import StepEditor from './StepEditor.jsx'
+import { listCourses } from '../../lib/course.js'
 
 export default function ContentEditor() {
   const { isAdmin } = useAuth()
   const [course, setCourse] = useState(null)
   const [lessonId, setLessonId] = useState(null)
   const [error, setError] = useState('')
+  const [courses, setCourses] = useState([])
+  const [code, setCode] = useState('en-a1-1')
 
-  const reload = useCallback(() => loadAdminCourse().then(c => {
+  useEffect(() => { listCourses().then(setCourses).catch(() => {}) }, [])
+  const reload = useCallback(() => loadAdminCourse(code).then(c => {
     setCourse(c)
-    setLessonId(id => id ?? c?.modules?.[0]?.lessons?.[0]?.id ?? null)
-  }).catch(e => setError(e.message)), [])
+    setLessonId(id => (id && c?.modules?.some(m => m.lessons.some(l => l.id === id))) ? id : (c?.modules?.[0]?.lessons?.[0]?.id ?? null))
+  }).catch(e => setError(e.message)), [code])
   useEffect(() => { reload() }, [reload])
 
   if (error) return <p className="error">{error}</p>
@@ -26,6 +30,13 @@ export default function ContentEditor() {
   return (
     <div className="cms">
       <aside className="cms-nav card">
+        {courses.length > 1 && (
+          <label className="small strong">Course
+            <select value={code} onChange={e => setCode(e.target.value)}>
+              {courses.map(c => <option key={c.code} value={c.code}>{c.title}{c.status !== 'published' ? ' (draft)' : ''}</option>)}
+            </select>
+          </label>
+        )}
         {course.modules.map(m => (
           <div key={m.id} className="cms-module">
             <p className="small strong">Module {m.position} · {m.title}</p>

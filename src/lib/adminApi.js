@@ -3,7 +3,7 @@ import { supabase } from './supabase.js'
 export async function loadAdminCourse(code = 'en-a1-1') {
   const { data, error } = await supabase
     .from('courses')
-    .select('id, code, title, modules(id, position, title, description, lessons(*))')
+    .select('id, code, title, language, voice_set, modules(id, position, title, description, lessons(*))')
     .eq('code', code)
     .maybeSingle()
   if (error) throw error

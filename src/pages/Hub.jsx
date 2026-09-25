@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { loadCourse } from '../lib/course.js'
+import { loadCourse, listCourses, currentCourseCode, setCurrentCourse } from '../lib/course.js'
 import { Loading } from '../components/Guards.jsx'
 import StreakBar from '../components/StreakBar.jsx'
 import { myProgress, syncTimezone } from '../lib/progressApi.js'
@@ -14,11 +14,21 @@ export default function Hub() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [prog, setProg] = useState(null)
+  const [courses, setCourses] = useState([])
+  const [code, setCode] = useState(currentCourseCode())
 
   useEffect(() => {
-    loadCourse().then(setCourse).catch(e => setError(e.message)).finally(() => setLoading(false))
+    listCourses().then(setCourses).catch(() => {})
     myProgress().then(setProg).catch(() => {})
   }, [])
+  useEffect(() => {
+    setLoading(true); setError('')
+    loadCourse(code).then(c => {
+      if (!c && code !== 'en-a1-1') { setCode('en-a1-1'); setCurrentCourse('en-a1-1'); return }
+      setCourse(c)
+    }).catch(e => setError(e.message)).finally(() => setLoading(false))
+  }, [code])
+  const pick = (c) => { setCurrentCourse(c); setCode(c) }
   useEffect(() => { if (profile) syncTimezone(profile) }, [profile?.id])
 
   if (loading) return <Loading />
@@ -28,6 +38,15 @@ export default function Hub() {
   const pct = course.total ? Math.round((course.done / course.total) * 100) : 0
   return (
     <main className="page">
+      {courses.length > 1 && (
+        <div className="tabs course-tabs" role="tablist" aria-label="Your courses">
+          {courses.map(c => (
+            <button key={c.code} role="tab" aria-selected={c.code === course.code} className={`tab ${c.code === course.code ? 'active' : ''}`} onClick={() => pick(c.code)}>
+              {c.title}{c.status !== 'published' ? ' (draft)' : ''}
+            </button>
+          ))}
+        </div>
+      )}
       <section className="card hub-top">
         <p className="eyebrow">{course.title}</p>
         <h1 className="h2">Welcome{profile?.preferred_name ? `, ${profile.preferred_name}` : ''}!</h1>
