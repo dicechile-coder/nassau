@@ -1,4 +1,5 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { extractEmbedUrl } from '../../lib/adminApi.js'
 import { usePageMeta } from '../SiteLayout.jsx'
 import { SITE } from '../../lib/site.js'
 import { LANGUAGES, A1_MODULES, FAQ } from '../content.js'
@@ -69,6 +70,7 @@ export function CoursePage() {
           {isEnglish
             ? <Link to="/signup" className="s-btn s-btn-primary">Try a free lesson <IconArrow size={20} /></Link>
             : <Link to="/placement" className="s-btn s-btn-primary">Book a free placement talk</Link>}
+          {SITE.levelTests?.[lang] && <Link to={`/level-test/${lang}`} className="s-btn s-btn-outline">Take the level test</Link>}
           {isEnglish
             ? <Link to="/placement" className="s-btn s-btn-outline">Book a placement talk</Link>
             : <a href={SITE.moodleUrl} className="s-btn s-btn-outline" target="_blank" rel="noopener">Student login (Academy)</a>}
@@ -239,7 +241,10 @@ export function Placement() {
               <span className="s-kicker">Request your talk</span>
               <h2 className="s-h2" style={{ fontSize: 'clamp(30px, 3.6vw, 44px)' }}>We’ll contact you within 1–2 working days.</h2>
               <p className="s-lead">Learning English on your own? You can also skip the talk and start with a free lesson right away.</p>
-              <div><Link to="/signup" className="s-link-arrow">Try a free English lesson <IconArrow size={18} /></Link></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <Link to="/level-test/dutch" className="s-link-arrow">Learning Dutch? Take the level test first <IconArrow size={18} /></Link>
+                <Link to="/signup" className="s-link-arrow">Try a free English lesson <IconArrow size={18} /></Link>
+              </div>
             </div>
             <div className="s-form-card"><MessageForm kind="placement" submitLabel="Request my placement talk" /></div>
           </div>
@@ -300,6 +305,45 @@ export function Contact() {
               <div className="s-contact-item" style={{ marginTop: 12 }}><div><strong>Already a student with a teacher?</strong><a href={SITE.moodleUrl} target="_blank" rel="noopener">Log in to the Academy</a></div></div>
             </div>
             <div className="s-form-card"><h2 className="s-h3">Send us a message</h2><MessageForm kind="contact" /></div>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
+
+/* ------------------------------ Level test ------------------------------ */
+const TEST_LANG = { dutch: ['Dutch', 'Nederlands'] }
+
+export function LevelTest() {
+  const { lang } = useParams()
+  const names = TEST_LANG[lang]
+  const test = SITE.levelTests?.[lang]
+  usePageMeta(names ? `${names[0]} level test` : 'Level test', names ? `Find your ${names[0]} level with a free online test, then book a placement talk with a Nassau teacher.` : undefined)
+  if (!names) return <Navigate to="/placement" replace />
+  const url = test?.h5pUrl ? extractEmbedUrl(test.h5pUrl) || test.h5pUrl : null
+  return (
+    <>
+      <PageHero kicker={`${names[1]} · level test`} title={`What is your ${names[0]} level?`}>
+        <p className="s-lead">A free online test with listening, reading and grammar questions. It takes about 20–30 minutes. Afterwards, a teacher helps you choose the right course or exam preparation.</p>
+      </PageHero>
+      <section className="s-section" style={{ paddingTop: 56 }}>
+        <div className="s-wrap">
+          {url ? (
+            <div className="s-test-frame">
+              <iframe title={`${names[0]} level test`} src={url} style={{ height: test.height || 700 }} allowFullScreen loading="lazy" />
+            </div>
+          ) : (
+            <div className="s-test-placeholder" role="status">
+              <strong>The online {names[0]} level test is coming soon.</strong>
+              <span>Until then, a teacher can find your level in a free 15–20 minute placement talk.</span>
+              <Link to="/placement" className="s-btn s-btn-primary">Book a placement talk</Link>
+            </div>
+          )}
+          <div className="s-steps" style={{ marginTop: 48 }}>
+            <div><h3 className="s-h3">Do the test</h3><p className="s-text">Answer at your own pace. Not sure? Skip the question instead of guessing.</p></div>
+            <div><h3 className="s-h3">Note your score</h3><p className="s-text">At the end you see your result. Write it down or take a screenshot.</p></div>
+            <div><h3 className="s-h3">Talk with a teacher</h3><p className="s-text">Share your result in the placement form. We advise you on the right level, course or exam track.</p></div>
           </div>
         </div>
       </section>

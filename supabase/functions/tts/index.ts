@@ -1,6 +1,8 @@
 // Supabase Edge Function: tts  (admin only)
 // Generates the course audio with ElevenLabs and stores it in the public "audio" bucket.
 //   action "voices"   → the voices in your ElevenLabs account (name, id, preview)
+//   action "library"  → { language?, accent?, gender?, age?, search? } → matching voices from the public
+//                        ElevenLabs Voice Library (read only; nothing is added to the account)
 //   action "test"     → { voice_id, text } → a short sample (base64 mp3), nothing is saved
 //   action "generate" → { id } → one audio_lines row: every part in its character's voice,
 //                        joined into one MP3, saved to audio/A1/…, and attached to the exercise
@@ -61,6 +63,23 @@ Deno.serve(async (req) => {
       if (!r.ok) return json({ error: `ElevenLabs ${r.status}: ${(await r.text()).slice(0, 300)}` }, 502);
       const d = await r.json();
       return json({ voices: (d.voices ?? []).map((v: any) => ({ id: v.voice_id, name: v.name, labels: v.labels ?? {}, preview: v.preview_url })) });
+    }
+
+    if (body.action === "library") {
+      const q = new URLSearchParams({ page_size: String(Math.min(50, Number(body.page_size) || 30)), sort: "usage_character_count_1y" });
+      for (const k of ["language", "accent", "gender", "age", "search", "use_cases", "category"]) {
+        if (body[k]) q.set(k, String(body[k]).slice(0, 80));
+      }
+      const r = await fetch(`${API}/shared-voices?${q}`, { headers: { "xi-api-key": key } });
+      if (!r.ok) return json({ error: `ElevenLabs ${r.status}: ${(await r.text()).slice(0, 300)}` }, 502);
+      const d = await r.json();
+      return json({ voices: (d.voices ?? []).map((v: any) => ({
+        id: v.voice_id, owner: v.public_owner_id, name: v.name, gender: v.gender, age: v.age, accent: v.accent,
+        language: v.language, locale: v.locale, descriptive: v.descriptive, use_case: v.use_case,
+        description: String(v.description ?? "").slice(0, 300), preview: v.preview_url,
+        users: v.cloned_by_count, free_users_allowed: v.free_users_allowed,
+        languages: (v.verified_languages ?? []).map((l: any) => `${l.language}${l.accent ? "/" + l.accent : ""}`),
+      })) });
     }
 
     if (body.action === "test") {

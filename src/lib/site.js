@@ -15,4 +15,8 @@ export const SITE = {
   // Self-study price: shown as a placeholder until decided
   selfStudyPrice: null,
   legalUpdated: '23 September 2026',
+  // Level tests (H5P). Paste the H5P embed link here when it's ready; null shows a "coming soon" placeholder.
+  levelTests: {
+    dutch: { h5pUrl: null, height: 700 },
+  },
 }

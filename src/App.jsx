@@ -4,7 +4,7 @@ import Header from './components/Header.jsx'
 import { RequireAuth, RequireStaff } from './components/Guards.jsx'
 import SiteLayout from './site/SiteLayout.jsx'
 import Home from './site/pages/Home.jsx'
-import { Courses, CoursePage, HowItWorks, Pricing, Placement, About, Contact } from './site/pages/Inner.jsx'
+import { Courses, CoursePage, HowItWorks, Pricing, Placement, About, Contact, LevelTest } from './site/pages/Inner.jsx'
 import { Login, Signup, ForgotPassword, UpdatePassword } from './pages/AuthPages.jsx'
 import Hub from './pages/Hub.jsx'
 import LessonPage from './pages/LessonPage.jsx'
@@ -31,6 +31,7 @@ export default function App() {
       <Route path="/how-it-works" element={<SiteLayout><HowItWorks /></SiteLayout>} />
       <Route path="/pricing" element={<SiteLayout><Pricing /></SiteLayout>} />
       <Route path="/placement" element={<SiteLayout><Placement /></SiteLayout>} />
+      <Route path="/level-test/:lang" element={<SiteLayout><LevelTest /></SiteLayout>} />
       <Route path="/about" element={<SiteLayout><About /></SiteLayout>} />
       <Route path="/contact" element={<SiteLayout><Contact /></SiteLayout>} />
       <Route path="/privacy" element={<SiteLayout plain><Privacy /></SiteLayout>} />
