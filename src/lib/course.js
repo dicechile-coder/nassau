@@ -7,7 +7,11 @@ export function currentCourseCode() {
 }
 export function setCurrentCourse(code) {
   try { localStorage.setItem(KEY, code) } catch { /* private mode: fine */ }
+  try { window.dispatchEvent(new CustomEvent('nassau:course', { detail: code })) } catch { /* old browser: fine */ }
 }
+// Course code → language ("nl-a1-1" → "nl")
+export const LANGUAGE_NAMES = { en: 'English', nl: 'Dutch', es: 'Spanish' }
+export const languageOf = (code) => String(code || '').split('-')[0] || 'en'
 
 // Courses this user can see: published ones (staff also see drafts), in order.
 export async function listCourses() {

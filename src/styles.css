@@ -19,7 +19,14 @@ h1, h2, h3 { line-height: 1.25; margin: 0 0 .5em; }
 .h2 { font-size: 1.6rem; } .h3 { font-size: 1.15rem; }
 .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
 .brand { font-weight: 700; text-decoration: none; color: var(--text); }
-.brand span { color: var(--accent); }
+.brand { display: inline-flex; align-items: center; gap: 8px; }
+.brand img { display: block; }
+.brand-logo img { height: 36px; width: auto; }
+.brand-lang { font-weight: 700; }
+/* one colour per language, taken from the logo */
+.lang-en { color: #D65E22; } .lang-nl { color: #2F5C8F; } .lang-es { color: #4E7A2E; }
+@media (prefers-color-scheme: dark) { .lang-en { color: #F0A05F; } .lang-nl { color: #7FB0E3; } .lang-es { color: #93C46A; } }
+@media (max-width: 420px) { .brand-name { display: none; } }
 .nav { display: flex; align-items: center; gap: 12px; }
 .page { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
 .narrow { max-width: 520px; }
