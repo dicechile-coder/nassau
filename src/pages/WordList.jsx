@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { loadCourse, courseCodeForLesson } from '../lib/course.js'
 import { Loading } from '../components/Guards.jsx'
-import { VocabTable } from './LessonPage.jsx'
+import { VocabTable, LESSON_UI } from './LessonPage.jsx'
 
 // Printable word list of one lesson. "Save as PDF" uses the browser's print dialog.
 export default function WordList() {
@@ -26,7 +26,7 @@ export default function WordList() {
     <main className="page narrow wordlist">
       <div className="no-print row">
         <Link className="small" to={`/learn/lesson/${lesson.id}`}>← Back to the lesson</Link>
-        <button className="btn btn-primary btn-sm" onClick={() => window.print()}>Guardar como PDF · Save as PDF</button>
+        <button className="btn btn-primary btn-sm" onClick={() => window.print()}>{(LESSON_UI[course.language] || LESSON_UI.nl).save}</button>
       </div>
       <header className="wordlist-head">
         <img src="/site/logo.png" alt="Nassau Academy" height="40" />
@@ -35,7 +35,7 @@ export default function WordList() {
           <h1 className="h2">{lesson.title}</h1>
         </div>
       </header>
-      {words.length ? <VocabTable words={words} /> : <p className="muted">No word list for this lesson yet.</p>}
+      {words.length ? <VocabTable words={words} lang={course.language} /> : <p className="muted">No word list for this lesson yet.</p>}
       <p className="small muted">Nassau Academy · nassauacademy.com</p>
     </main>
   )

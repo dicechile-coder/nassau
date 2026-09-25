@@ -6,6 +6,7 @@ const AVATARS = {
   jan: 'jan', 'sofía': 'sofia', sofia: 'sofia', luis: 'luis', maya: 'maya', emma: 'emma', ana: 'ana',
   'mr. martis': 'martis', martis: 'martis', 'the fruit seller': 'seller', seller: 'seller',
   'peter de vries': 'teacher', 'meneer de vries': 'teacher', valentina: 'valentina', rafael: 'rafael', megan: 'megan', 'oude man': 'oldman',
+  carmen: 'carmen', diego: 'diego', 'lucía': 'lucia', lucia: 'lucia', 'el vendedor': 'seller', vendedor: 'seller', 'señor': 'oldman',
 }
 const DISPLAY = { 'Peter de Vries': 'Meneer De Vries', 'the fruit seller': 'Fruit seller' }
 const avatarFor = (p) => AVATARS[String(p || '').toLowerCase()]
@@ -18,6 +19,9 @@ const UI = {
   nl: { online: 'en línea · online', typing: 'escribiendo… · typing…', tutor: 'con Nate · AI tutor', placeholder: 'Escribe en neerlandés… · Type in Dutch…',
         mic: 'Pronto: mensajes de voz · Voice messages coming soon', done: 'Goed zo!', doneSub: 'Conversación completada · Conversation complete', again: 'Continuar · Continue',
         left: 'Mensajes de IA hoy · AI messages left today:', skip: 'Saltar · Skip for now', you: 'Tú · You', finished: 'Conversación terminada · Chat finished' },
+  es: { online: 'online', typing: 'typt… · typing…', tutor: 'met Nate · AI tutor', placeholder: 'Schrijf in het Spaans… · Type in Spanish…',
+        mic: 'Binnenkort: spraakberichten · Voice messages coming soon', done: '¡Muy bien!', doneSub: 'Gesprek afgerond · Conversation complete', again: 'Verder · Continue',
+        left: 'AI-berichten vandaag · AI messages left today:', skip: 'Overslaan · Skip for now', you: 'Jij · You', finished: 'Gesprek afgelopen · Chat finished' },
 }
 
 export function RolePlay({ step, c = {}, ad, f, lang, preview, onDone, onSkip }) {
@@ -44,7 +48,7 @@ export function RolePlay({ step, c = {}, ad, f, lang, preview, onDone, onSkip })
   const tidy = (a) => {
     let t = f(String(a)).trim().replace(/\bi\b/g, 'I')
     t = t.charAt(0).toUpperCase() + t.slice(1)
-    if (lang !== 'nl' && /[a-z]$/i.test(t)) t += ' …'
+    if (lang === 'en' && /[a-z]$/i.test(t)) t += ' …'
     return t
   }
   const chips = !busy && !done && !limit

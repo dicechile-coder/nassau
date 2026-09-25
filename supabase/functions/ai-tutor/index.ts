@@ -67,8 +67,9 @@ Deno.serve(async (req) => {
 
     const { data: lesson } = await admin.from("lessons")
       .select("title, objective, content, tip, module:modules(course:courses(language))").eq("id", step.lesson_id).maybeSingle();
-    // Course language: "en" (English course) or "nl" (Dutch course). Default English.
-    const lang = (lesson as any)?.module?.course?.language === "nl" ? "nl" : "en";
+    // Course language: "en" (English), "nl" (Dutch) or "es" (Spanish). Default English.
+    const courseLang = (lesson as any)?.module?.course?.language;
+    const lang = courseLang === "nl" || courseLang === "es" ? courseLang : "en";
     const settings = settingsRow?.value ?? {};
     const model = settings.model ?? "google/gemini-2.5-flash";
     const p = { ...profile, preferred_name: profile?.preferred_name || profile?.full_name?.split(" ")[0] || null } as Record<string, string | null>;
@@ -111,7 +112,28 @@ Deno.serve(async (req) => {
       ).join("\n");
       const persona = ad.persona || "Nate";
       const formal = ["Peter de Vries", "Oude man"].includes(persona);
-      const system = lang === "nl" ? [
+      const formalEs = ["Carmen", "Señor", "el vendedor", "Vendedor", "Rosa"].includes(persona);
+      const system = lang === "es" ? [
+        `You are ${persona}, a friendly character in a Spanish course for complete beginners (CEFR A1) at Nassau Academy in Curaçao.`,
+        persona === "Carmen" ? `You are Carmen, Sofía's Venezuelan mother: warm, patient and a little motherly.` : "",
+        persona === "Señor" ? `You are an older gentleman in Punda (Willemstad), polite and helpful.` : "",
+        /vendedor/i.test(persona) ? `You are a fruit seller at the floating market in Punda, cheerful and quick.` : "",
+        `Most students are Dutch speakers living in Curaçao who want to talk with Latin Americans; some speak English.`,
+        `You are practising a short scene with the student, ${p.preferred_name || "the student"}${p.country ? ` from ${p.country}` : ""}.`,
+        `Lesson: "${lesson?.title ?? ""}". Goal: ${lesson?.objective ?? ""}. Language focus: ${lesson?.content ?? ""}`,
+        lesson?.tip ? `Typical mistake in this lesson: ${lesson.tip}` : "",
+        `Scene plan:\n${script || "- Have a short friendly conversation about the lesson topic."}`,
+        `Rules:`,
+        `- Speak ONLY simple A1 Latin American Spanish in "reply". Present tense only (no past tenses). Maximum 2 short sentences. Use only words a beginner knows.`,
+        formalEs ? `- You are older / a stranger: the student should address you with "usted". You may address the student with "tú".` : `- Use "tú" with the student (informal).`,
+        `- Stay in the scene. If the student goes off-topic, gently bring them back.`,
+        `- If the student makes a mistake related to the lesson (ser/estar, tener for age, gender endings, tú/usted, word order…), put ONE short correction in "tip": first the correct Spanish sentence, then a very short explanation in Dutch and English, e.g. "Tengo 27 años. · In het Spaans: tener (niet ser). · Spanish uses tener for age." Otherwise "tip" is empty.`,
+        `- If the student writes in Dutch or English, reply in simple Spanish and put the Spanish sentence they need in "tip".`,
+        `- Accept missing accents and ¿ ¡ marks, and small spelling mistakes outside the lesson focus.`,
+        `- Never ask for sensitive personal information (address, phone, passwords).`,
+        `- The scene is "done" when the student has done every part of the scene plan, or after ${MAX_STUDENT_TURNS} student messages. When done, end with a short friendly goodbye in Spanish.`,
+        `Reply ONLY with JSON: {"reply": string, "tip": string, "done": boolean, "goals_met": boolean}`,
+      ].filter(Boolean).join("\n") : lang === "nl" ? [
         `You are ${persona}, a friendly character in a Dutch course for complete beginners (CEFR A1) at Nassau Academy in Curaçao.`,
         persona === "Peter de Vries" ? `You are meneer De Vries, the Dutch teacher: calm, warm and precise.` : "",
         `Most students are Spanish speakers from Latin America; some speak English.`,
@@ -160,9 +182,9 @@ Deno.serve(async (req) => {
         c.target ? `Lesson target to check: ${c.target}` : `Lesson focus: ${lesson?.content ?? lesson?.title ?? ""}`,
         c.required?.length ? `Required details: ${c.required.join(", ")}` : "",
       ].filter(Boolean).join("\n");
-      const target = lang === "nl" ? "Dutch" : "English";
+      const target = lang === "nl" ? "Dutch" : lang === "es" ? "Spanish" : "English";
       const system = [
-        `You mark short writing tasks for complete beginners (CEFR A1) learning ${target}, most of them Spanish speakers.`,
+        `You mark short writing tasks for complete beginners (CEFR A1) learning ${target}, ${lang === "es" ? "most of them Dutch speakers" : "most of them Spanish speakers"}.`,
         `Be kind, encouraging and fair for A1. Focus mainly on the lesson target; ignore small errors outside it.`,
         `Rubric, each 0–2 points:`,
         `- task: 0 = most required information missing, 1 = some missing, 2 = all included`,
@@ -171,7 +193,7 @@ Deno.serve(async (req) => {
         `- communication: 0 = a reader cannot follow it, 1 = understandable with effort, 2 = easy to understand`,
         `If the answer is empty, not in ${target}, or not about the task, set "no_score": true and give a short "reason".`,
         `If the answer is far above A1 level (likely copied), set "level_flag": true.`,
-        `Give one short "strength", at most two "corrections" (lesson target first) with the corrected sentence, and an optional one-line Spanish hint "hint_es".`,
+        `Give one short "strength", at most two "corrections" (lesson target first) with the corrected sentence, and an optional one-line ${lang === "es" ? "Dutch" : "Spanish"} hint "hint_es".`,
         `Never rewrite the whole text. Use simple English in all feedback.`,
         `Reply ONLY with JSON: {"no_score": boolean, "reason": string, "scores": {"task": 0-2, "target": 0-2, "words": 0-2, "communication": 0-2}, "strength": string, "corrections": [{"wrong": string, "right": string, "why": string}], "hint_es": string, "level_flag": boolean}`,
       ].join("\n");
@@ -227,7 +249,7 @@ Deno.serve(async (req) => {
     }
 
     // mark
-    if (out.no_score) return json({ no_score: true, reason: out.reason || `Please answer the task in ${lang === "nl" ? "Dutch" : "English"}.`, remaining });
+    if (out.no_score) return json({ no_score: true, reason: out.reason || `Please answer the task in ${lang === "nl" ? "Dutch" : lang === "es" ? "Spanish" : "English"}.`, remaining });
     const s = out.scores ?? {};
     const clamp = (n: unknown) => Math.max(0, Math.min(2, Number(n) || 0));
     const scores = { task: clamp(s.task), target: clamp(s.target), words: clamp(s.words), communication: clamp(s.communication) };

@@ -49,7 +49,10 @@ export default function LessonPage() {
   }, [lessonId, preview])
 
   const lesson = course?.lessons.find(l => l.id === lessonId)
-  const bilingual = course?.language === 'nl'
+  const lang = course?.language || 'en'
+  // Dutch course: helper texts in Spanish · English; Spanish course: helper texts in Dutch · English
+  const bilingual = lang === 'nl' || lang === 'es'
+  const T = LESSON_UI[lang] || LESSON_UI.nl
   const vocab = Array.isArray(lesson?.vocab) ? lesson.vocab : []
   const nextLesson = useMemo(() => {
     if (!course || !lesson) return null
@@ -139,15 +142,15 @@ export default function LessonPage() {
           {bilingual
             ? (lesson.tip || lesson.tip_es) && (
                 <div className="tip">
-                  {lesson.tip_es && <p className="tip-line"><strong>Consejo:</strong> {lesson.tip_es}</p>}
-                  {lesson.tip && <p className="tip-line"><strong>Tip:</strong> {lesson.tip}</p>}
+                  {lesson.tip_es && <p className="tip-line"><strong>{T.tip2}</strong> {lesson.tip_es}</p>}
+                  {lesson.tip && <p className="tip-line"><strong>{T.tip}</strong> {lesson.tip}</p>}
                 </div>)
             : lesson.tip && <p className="tip"><strong>Spanish-speaker tip:</strong> {lesson.tip}</p>}
           {vocab.length > 0 && (
             <details className="vocab-box">
-              <summary>Palabras de esta lección · Words in this lesson ({vocab.length})</summary>
-              <VocabTable words={vocab} />
-              <Link className="small" to={`/learn/lesson/${lesson.id}/words`}>Descargar PDF · Download PDF</Link>
+              <summary>{T.words} ({vocab.length})</summary>
+              <VocabTable words={vocab} lang={lang} />
+              <Link className="small" to={`/learn/lesson/${lesson.id}/words`}>{T.pdf}</Link>
             </details>
           )}
           <p className="muted small">{steps.length} steps{lesson.minutes ? ` · about ${lesson.minutes} minutes` : ''} · pass mark {lesson.pass_mark ?? 70}%</p>
@@ -184,9 +187,9 @@ export default function LessonPage() {
           {!result.preview && result.best_score != null && <p className="muted small">Best score: {result.best_score}%</p>}
           {result.passed && vocab.length > 0 && (
             <div className="vocab-box left-text">
-              <h2 className="h3">Palabras de esta lección · Words in this lesson</h2>
-              <VocabTable words={vocab} />
-              <Link className="btn btn-ghost btn-sm" to={`/learn/lesson/${lesson.id}/words`}>Descargar PDF · Download PDF</Link>
+              <h2 className="h3">{T.words}</h2>
+              <VocabTable words={vocab} lang={lang} />
+              <Link className="btn btn-ghost btn-sm" to={`/learn/lesson/${lesson.id}/words`}>{T.pdf}</Link>
             </div>
           )}
           {!preview && prog && <div className="row center-row"><StreakBar p={prog} compact /></div>}
@@ -257,12 +260,23 @@ function Rubric({ r }) {
   )
 }
 
-// Word list of a lesson: Dutch (or English) word + English + Spanish.
-export function VocabTable({ words }) {
+// Labels for the helper texts per course language (Dutch course: Spanish helper; Spanish course: Dutch helper).
+export const LESSON_UI = {
+  nl: { tip2: 'Consejo:', tip: 'Tip:', words: 'Palabras de esta lección · Words in this lesson', pdf: 'Descargar PDF · Download PDF', save: 'Guardar como PDF · Save as PDF' },
+  es: { tip2: 'Tip:', tip: 'In English:', words: 'Woorden van deze les · Words in this lesson', pdf: 'Download PDF', save: 'Opslaan als PDF · Save as PDF' },
+}
+
+// Word list of a lesson: the course language first, then its translations.
+const VOCAB_COLS = {
+  es: [['es', 'Español'], ['nl', 'Nederlands'], ['en', 'English']],
+  default: [['nl', 'Nederlands'], ['en', 'English'], ['es', 'Español']],
+}
+export function VocabTable({ words, lang }) {
+  const cols = VOCAB_COLS[lang] || VOCAB_COLS.default
   return (
     <table className="table vocab-table">
-      <thead><tr><th>Nederlands</th><th>English</th><th>Español</th></tr></thead>
-      <tbody>{words.map((w, i) => <tr key={i}><td><strong>{w.nl ?? w.word}</strong></td><td>{w.en}</td><td>{w.es}</td></tr>)}</tbody>
+      <thead><tr>{cols.map(([, label]) => <th key={label}>{label}</th>)}</tr></thead>
+      <tbody>{words.map((w, i) => <tr key={i}>{cols.map(([k], j) => <td key={k}>{j === 0 ? <strong>{w[k] ?? w.word}</strong> : w[k]}</td>)}</tr>)}</tbody>
     </table>
   )
 }
