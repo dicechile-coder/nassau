@@ -227,6 +227,12 @@ textarea { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px so
 
 /* Course switcher on the learning hub */
 .course-tabs { margin-bottom: 16px; flex-wrap: wrap; }
+/* course tabs in the language colour (same as the header) */
+.course-tab { --lc: var(--primary); border-color: var(--lc); color: var(--lc); font-weight: 600; }
+.course-tab.tab-en { --lc: #D65E22; } .course-tab.tab-nl { --lc: #2F5C8F; } .course-tab.tab-es { --lc: #4E7A2E; }
+@media (prefers-color-scheme: dark) { .course-tab.tab-en { --lc: #F0A05F; } .course-tab.tab-nl { --lc: #7FB0E3; } .course-tab.tab-es { --lc: #93C46A; } }
+.course-tab.active { background: var(--lc); border-color: var(--lc); color: #fff; }
+@media (prefers-color-scheme: dark) { .course-tab.active { color: #10161d; } }
 
 /* Dutch course: bilingual tips and word lists */
 .tip-line { margin: 0 0 4px; }

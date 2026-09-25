@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth.jsx'
-import { loadCourse, listCourses, currentCourseCode, setCurrentCourse } from '../lib/course.js'
+import { loadCourse, listCourses, currentCourseCode, setCurrentCourse, languageOf } from '../lib/course.js'
 import { Loading } from '../components/Guards.jsx'
 import StreakBar from '../components/StreakBar.jsx'
 import { myProgress, syncTimezone } from '../lib/progressApi.js'
@@ -41,7 +41,7 @@ export default function Hub() {
       {courses.length > 1 && (
         <div className="tabs course-tabs" role="tablist" aria-label="Your courses">
           {courses.map(c => (
-            <button key={c.code} role="tab" aria-selected={c.code === course.code} className={`tab ${c.code === course.code ? 'active' : ''}`} onClick={() => pick(c.code)}>
+            <button key={c.code} role="tab" aria-selected={c.code === course.code} className={`tab course-tab tab-${languageOf(c.code)} ${c.code === course.code ? 'active' : ''}`} onClick={() => pick(c.code)}>
               {c.title}{c.status !== 'published' ? ' (draft)' : ''}
             </button>
           ))}
