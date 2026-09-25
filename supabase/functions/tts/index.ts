@@ -6,6 +6,7 @@
 //   action "test"     → { voice_id, text } → a short sample (base64 mp3), nothing is saved
 //   action "generate" → { id } → one audio_lines row: every part in its character's voice,
 //                        joined into one MP3, saved to audio/A1/…, and attached to the exercise
+//                        (ids starting with "NL-" use the Dutch voices "voices_nl" and go to audio/NL-A1/…)
 // Needs the secret ELEVENLABS_API_KEY. The key never leaves this function.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -40,7 +41,9 @@ Deno.serve(async (req) => {
     if (!key) return json({ error: "ELEVENLABS_API_KEY is not set in Supabase → Edge Functions → Secrets" }, 400);
 
     const body = await req.json();
-    const { data: sRow } = await admin.from("app_settings").select("value").eq("key", "voices").maybeSingle();
+    // Dutch lines (ids starting with "NL-") use the Dutch voice set
+    const isNl = String(body.id ?? "").startsWith("NL-") || body.voice_set === "voices_nl";
+    const { data: sRow } = await admin.from("app_settings").select("value").eq("key", isNl ? "voices_nl" : "voices").maybeSingle();
     const s = sRow?.value ?? {};
     const model = s.model || "eleven_multilingual_v2";
     const format = s.format || "mp3_44100_192";
@@ -98,7 +101,7 @@ Deno.serve(async (req) => {
       let chars = 0;
       for (let i = 0; i < row.lines.length; i++) {
         const l = row.lines[i];
-        const voice = voices[l.speaker] || (l.speaker === "All" ? voices["Maya"] : null);
+        const voice = voices[l.speaker] || (l.speaker === "All" ? voices[isNl ? "Sofía" : "Maya"] : null);
         if (!voice) return json({ error: `No voice chosen for ${l.speaker}` }, 400);
         const text = (i > 0 ? '<break time="0.8s" /> ' : "") + l.say;
         chars += l.say.length;
@@ -108,7 +111,8 @@ Deno.serve(async (req) => {
       const mp3 = new Uint8Array(total);
       let o = 0; for (const p of parts) { mp3.set(p, o); o += p.length; }
 
-      const path = row.kind === "episode" ? `A1/E${String(row.episode).padStart(2, "0")}/${row.id}.mp3` : `A1/exercises/${row.id}.mp3`;
+      const base = isNl ? "NL-A1" : "A1";
+      const path = row.kind === "episode" ? `${base}/E${String(row.episode).padStart(2, "0")}/${row.id}.mp3` : `${base}/exercises/${row.id}.mp3`;
       const up = await admin.storage.from("audio").upload(path, mp3, { contentType: "audio/mpeg", upsert: true });
       if (up.error) return json({ error: `Storage: ${up.error.message}` }, 500);
       const publicUrl = `${admin.storage.from("audio").getPublicUrl(path).data.publicUrl}?v=${Date.now()}`;
