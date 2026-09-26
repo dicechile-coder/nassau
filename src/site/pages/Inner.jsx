@@ -124,7 +124,7 @@ export function CoursePage() {
           <FaqList />
         </div>
       </section>
-      <FinalCta />
+      <FinalCta lang={lang} />
     </>
   )
 }

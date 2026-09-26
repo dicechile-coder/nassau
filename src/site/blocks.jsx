@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SITE } from '../lib/site.js'
 import { videoEmbedUrl } from '../components/Media.jsx'
-import { LANGUAGES, LANGUAGE_ORDER, STATUS, CAST, FAQ } from './content.js'
+import { LANGUAGES, LANGUAGE_ORDER, STATUS, CAST, FAQ, STILLS } from './content.js'
 import { IconCheck, IconArrow, IconPlay, IconTarget, IconCap, IconShield } from './icons.jsx'
 
 export function Head({ kicker, title, text, center, kickerClass = '' }) {
@@ -25,21 +25,58 @@ export function Checks({ items, color = '#4E7A2E' }) {
   )
 }
 
-// Episode 1 preview: a still with a play button; the real Bunny player loads on click.
-export function EpisodePreview() {
-  const [playing, setPlaying] = useState(false)
-  const embed = videoEmbedUrl(SITE.episode1Url)
+// Slider: moves to the next slide every few seconds; stops while paused or when the visitor prefers less motion.
+function useSlider(count, ms = 5000, paused = false) {
+  const [i, setI] = useState(0)
+  useEffect(() => {
+    if (paused || count < 2) return
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    const t = setInterval(() => setI(n => (n + 1) % count), ms)
+    return () => clearInterval(t)
+  }, [count, ms, paused])
+  return [i, setI]
+}
+
+function SlideDots({ slides, active, onPick }) {
   return (
-    <div className="s-video">
+    <span className="s-dots" role="tablist" aria-label="Courses">
+      {slides.map((s, n) => (
+        <button key={s.lang} type="button" role="tab" aria-selected={n === active}
+                className={n === active ? 'on' : ''} style={{ '--dot': LANGUAGES[s.lang].color }}
+                aria-label={LANGUAGES[s.lang].name} onClick={() => onPick(n)} />
+      ))}
+    </span>
+  )
+}
+
+function SlideImages({ slides, active, eager = false }) {
+  return slides.map((s, n) => (
+    <img key={s.src} src={s.src} width="1280" height="720" alt={n === active ? s.alt : ''} aria-hidden={n !== active}
+         loading={eager && n === 0 ? undefined : 'lazy'} className={`s-fade${n === active ? ' on' : ''}${n > 0 ? ' s-fade-abs' : ''}`} />
+  ))
+}
+
+// Episode 1 preview: English, Dutch and Spanish stills in turn; the real Bunny player loads on click.
+export function EpisodePreview() {
+  const slides = STILLS.hero
+  const [playing, setPlaying] = useState(false)
+  const [hover, setHover] = useState(false)
+  const [i, setI] = useSlider(slides.length, 5000, playing || hover)
+  const cur = slides[i]
+  const embed = videoEmbedUrl(SITE.episode1Urls?.[cur.lang] || SITE.episode1Url)
+  return (
+    <div className="s-video" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       {playing && embed ? (
-        <iframe src={embed.replace('autoplay=false', 'autoplay=true')} title="Episode 1: Hello, I'm…"
+        <iframe src={embed.replace('autoplay=false', 'autoplay=true')} title={`Episode 1: ${cur.title}`}
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen />
       ) : (
         <>
-          <img src="/site/still-e01.webp" width="1280" height="720" alt="Episode 1: Jan welcomes Luis at the Nassau Academy reception" />
+          <SlideImages slides={slides} active={i} eager />
+          <span className="s-slide-lang" style={{ background: LANGUAGES[cur.lang].color }}>{LANGUAGES[cur.lang].native}</span>
           <div className="s-video-bar">
-            <button type="button" className="s-play" aria-label="Play episode 1" onClick={() => setPlaying(true)}><IconPlay /></button>
-            <div className="s-video-meta"><small>EPISODE 1 · ENGLISH A1</small><strong>Hello, I’m… · 0:56</strong></div>
+            <button type="button" className="s-play" aria-label={`Play episode 1 (${LANGUAGES[cur.lang].name})`} onClick={() => setPlaying(true)}><IconPlay /></button>
+            <div className="s-video-meta"><small>{cur.label}</small><strong>{cur.title}</strong></div>
+            <SlideDots slides={slides} active={i} onPick={setI} />
           </div>
         </>
       )}
@@ -86,6 +123,18 @@ export function LessonSteps() {
   )
 }
 
+function BandSlider() {
+  const slides = STILLS.band
+  const [i, setI] = useSlider(slides.length, 5000)
+  return (
+    <div className="s-band-img">
+      <SlideImages slides={slides} active={i} />
+      <span className="s-slide-lang" style={{ background: LANGUAGES[slides[i].lang].color }}>{LANGUAGES[slides[i].lang].native}</span>
+      <SlideDots slides={slides} active={i} onPick={setI} />
+    </div>
+  )
+}
+
 export function StoryBand() {
   return (
     <section className="s-band">
@@ -94,9 +143,9 @@ export function StoryBand() {
           <div>
             <span className="s-kicker light">A STORY WORTH FOLLOWING</span>
             <h2 className="s-h2">Meet the class. Learn right alongside them.</h2>
-            <p className="s-lead">In our English course, four strangers meet at Nassau Academy in Curaçao. Over 16 episodes they become friends, lose a bag, find a sister’s note, and learn to get around the island. You learn every word right alongside them.</p>
+            <p className="s-lead">In every course, a group of strangers meets in Curaçao. Over 16 episodes they become friends, go to the beach, get lost in Punda and learn to get around the island. You learn every word right alongside them.</p>
           </div>
-          <div className="s-band-img"><img src="/site/still-e12.webp" width="1280" height="720" loading="lazy" alt="Episode 12: Luis welcomes his sister Ana at Curaçao airport" /></div>
+          <BandSlider />
         </div>
         <div className="s-cast">
           {CAST.map(([id, name, line]) => (
@@ -191,12 +240,18 @@ export function FaqList({ items = FAQ }) {
   )
 }
 
-export function FinalCta() {
+// Final call to action. On a course page (lang = 'dutch' | 'english' | 'spanish') it shows that course's still;
+// elsewhere the three courses take turns.
+export function FinalCta({ lang }) {
+  const all = STILLS.cta
+  const slides = lang ? all.filter(s => s.lang === lang) : all
+  const [i, setI] = useSlider(slides.length, 5000)
   return (
     <section className="s-section">
       <div className="s-wrap">
         <div className="s-cta">
-          <img src="/site/still-e16.webp" alt="" loading="lazy" />
+          {slides.map((s, n) => <img key={s.src} src={s.src} alt="" loading="lazy" className={`s-fade${n === i ? ' on' : ''}`} />)}
+          {slides.length > 1 && <SlideDots slides={slides} active={i} onPick={setI} />}
           <div>
             <h2>Your first lesson is waiting.</h2>
             <p>Try a free lesson in English, Dutch or Spanish, or book a free placement talk for Dutch, English or Spanish.</p>

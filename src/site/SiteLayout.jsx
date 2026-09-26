@@ -37,6 +37,9 @@ function SiteHeader() {
           {NAV.map(([to, label]) => <NavLink key={to} to={to}>{label}</NavLink>)}
         </nav>
         <div className="s-header-actions">
+          <a href={SITE.moodleUrl} className="s-moodle" target="_blank" rel="noopener" title="Teacher-led classes on Moodle">
+            <img src="/site/moodle-icon.png" alt="" width="32" height="22" /> Moodle
+          </a>
           {user ? (
             <Link to="/learn" className="s-btn s-btn-primary s-btn-sm">My lessons</Link>
           ) : (
@@ -53,6 +56,7 @@ function SiteHeader() {
       </div>
       <nav id="s-mobile-nav" className={`s-mobile-nav${open ? ' open' : ''}`} aria-label="Mobile">
         {NAV.map(([to, label]) => <Link key={to} to={to}>{label}</Link>)}
+        <a href={SITE.moodleUrl} target="_blank" rel="noopener" className="s-moodle-m"><img src="/site/moodle-icon.png" alt="" width="29" height="20" /> Moodle (teacher-led classes)</a>
         {user ? <Link to="/learn" className="s-btn s-btn-primary">My lessons</Link> : (
           <>
             <Link to="/login">Log in</Link>

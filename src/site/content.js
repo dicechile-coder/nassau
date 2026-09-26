@@ -54,6 +54,25 @@ export const LANGUAGES = {
 }
 export const LANGUAGE_ORDER = ['dutch', 'english', 'spanish']
 
+// Video stills per course for the sliders on the website (English first).
+export const STILLS = {
+  hero: [
+    { lang: 'english', src: '/site/still-e01.webp', label: 'EPISODE 1 · ENGLISH A1', title: 'Hello, I’m… · 0:56', alt: 'Episode 1: Jan welcomes Luis at the Nassau Academy reception' },
+    { lang: 'dutch', src: '/site/still-nl-e01.webp', label: 'AFLEVERING 1 · NEDERLANDS A1', title: 'Hallo, ik ben… · 0:56', alt: 'Dutch episode 1: Jan welcomes Megan at the Nassau Academy reception' },
+    { lang: 'spanish', src: '/site/still-es-e01.webp', label: 'EPISODIO 1 · ESPAÑOL A1', title: 'Hola, soy Jan · 0:33', alt: 'Spanish episode 1: Jan meets Sofía’s mother Carmen' },
+  ],
+  band: [
+    { lang: 'english', src: '/site/still-e12.webp', alt: 'English episode 12: Luis welcomes his sister Ana at Curaçao airport' },
+    { lang: 'dutch', src: '/site/still-nl-e12.webp', alt: 'Dutch episode 12: the class spends Sunday at the beach' },
+    { lang: 'spanish', src: '/site/still-es-e12.webp', alt: 'Spanish episode 12: six friends at the beach bar' },
+  ],
+  cta: [
+    { lang: 'english', src: '/site/still-e16.webp', alt: '' },
+    { lang: 'dutch', src: '/site/still-nl-e16.webp', alt: '' },
+    { lang: 'spanish', src: '/site/still-es-e16.webp', alt: '' },
+  ],
+}
+
 export const STATUS = {
   now: ['Available now', 'st-now'],
   free: ['Try it today', 'st-now'],

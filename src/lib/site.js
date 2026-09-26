@@ -4,7 +4,7 @@ export const SITE = {
   name: 'Nassau Academy',
   legalName: 'Nassau Academy',
   country: 'Curaçao',
-  contactEmail: 'info@nassauacademy.com',
+  contactEmail: 'nassau.curacao@outlook.com',
   whatsapp: '+599 9511 2981',
   whatsappUrl: 'https://wa.me/59995112981',
   instagram: '@nassau_curacao',
@@ -12,6 +12,11 @@ export const SITE = {
   moodleUrl: 'https://www.nassauacademy.com/academy',
   // Episode 1 on Bunny Stream (hero video on the home page)
   episode1Url: 'https://player.mediadelivery.net/play/760700/bd501784-d8e7-4d61-9b99-39b07de0d452',
+  episode1Urls: {
+    english: 'https://player.mediadelivery.net/play/760700/bd501784-d8e7-4d61-9b99-39b07de0d452',
+    dutch: 'https://player.mediadelivery.net/play/760700/b8fd5ff1-de1e-4d4b-b3ea-713050953926',
+    spanish: 'https://player.mediadelivery.net/play/760700/e635ab35-46d7-49e3-a37e-f4f6f25d44c6',
+  },
   // Self-study price: shown as a placeholder until decided
   selfStudyPrice: null,
   legalUpdated: '23 September 2026',
