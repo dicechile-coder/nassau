@@ -11,7 +11,8 @@ async function call(body) {
   return data
 }
 
-export const aiChat = (stepId, messages, preview = false) => call({ action: 'chat', step_id: stepId, messages, preview })
+// extra: { speak: true } → spoken reply ("audio", base64 mp3); { audio, audio_type } → a voice message (returns "heard")
+export const aiChat = (stepId, messages, preview = false, extra = {}) => call({ action: 'chat', step_id: stepId, messages, preview, ...extra })
 export const aiMark = (stepId, text, variationIndex, preview = false) => call({ action: 'mark', step_id: stepId, text, variation_index: variationIndex, preview })
 
 export async function myAllowance() {

@@ -16,7 +16,7 @@ export function Privacy() {
         <li><strong>Account data:</strong> your name, email address and password (the password is stored encrypted; we cannot read it).</li>
         <li><strong>Profile answers:</strong> what you enter in the course, such as the name you prefer, your country and nationality.</li>
         <li><strong>Learning data:</strong> your answers, scores, lesson progress, XP, streak and the days you practised.</li>
-        <li><strong>AI conversations and writing:</strong> the messages you write to the AI tutor and the texts you submit for AI feedback, together with the feedback.</li>
+        <li><strong>AI conversations and writing:</strong> the messages you write or speak to the AI tutor (as text) and the texts you submit for AI feedback, together with the feedback.</li>
         <li><strong>Technical data:</strong> basic logs needed to run and secure the service (for example the time of a request). We do not use advertising or tracking cookies.</li>
       </ul>
 
@@ -31,12 +31,14 @@ export function Privacy() {
 
       <h2 className="h3">The AI tutor</h2>
       <p>When you use a role-play or a writing task, your text is sent to an AI model (currently Google Gemini through the OpenRouter service) to create a reply or feedback. Please do not write sensitive personal information (such as health, financial or ID details) in these exercises. AI feedback is automatic and can contain mistakes. Our staff may read AI conversations to check the quality of the feedback.</p>
+      <p>If you send a voice message in a role-play, the recording is sent to ElevenLabs to turn it into text, and the character's spoken reply is made by ElevenLabs as well. We do not store your recordings; only the text of what was heard is kept with the conversation. Your browser asks for permission before the microphone is used, and you can always type instead.</p>
 
       <h2 className="h3">Who processes your data for us</h2>
       <ul>
         <li><strong>Supabase</strong> — database, login and server functions.</li>
         <li><strong>Hostinger</strong> — hosting of the website.</li>
         <li><strong>OpenRouter / Google</strong> — AI replies and feedback (only the text of the AI exercises).</li>
+        <li><strong>ElevenLabs</strong> — the voices in the lessons, and turning voice messages in role-plays into text.</li>
         <li><strong>Bunny.net (Bunny Stream)</strong> — streaming of the lesson videos.</li>
       </ul>
       <p>These providers may process data outside {SITE.country}. They only process it to provide their service to us.</p>
