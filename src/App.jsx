@@ -13,6 +13,7 @@ import Progress from './pages/Progress.jsx'
 import WordList from './pages/WordList.jsx'
 import { Privacy, Terms } from './pages/Legal.jsx'
 import Footer from './components/Footer.jsx'
+import NateBubble from './components/NateBubble.jsx'
 
 export default function App() {
   if (!isConfigured) {
@@ -60,6 +61,7 @@ function AppShell() {
         <Route path="*" element={<main className="page narrow"><h1>Page not found</h1><p><a href="/">Go to the home page</a></p></main>} />
       </Routes>
       <Footer />
+      <NateBubble />
     </>
   )
 }

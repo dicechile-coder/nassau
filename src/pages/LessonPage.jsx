@@ -9,6 +9,7 @@ import StepView from '../components/player/StepView.jsx'
 import { Video } from '../components/Media.jsx'
 import StreakBar from '../components/StreakBar.jsx'
 import { myProgress } from '../lib/progressApi.js'
+import { announceStep } from '../components/NateBubble.jsx'
 
 export default function LessonPage() {
   const { lessonId } = useParams()
@@ -59,6 +60,11 @@ export default function LessonPage() {
     const i = course.lessons.findIndex(l => l.id === lesson.id)
     return course.lessons[i + 1] ?? null
   }, [course, lesson])
+
+  // tell floating Nate which exercise is on screen (he explains it, never gives the answer)
+  const nateStepId = phase === 'play' && steps ? steps[queue[pos]]?.id ?? null : null
+  useEffect(() => { announceStep(lessonId, nateStepId) }, [lessonId, nateStepId])
+  useEffect(() => () => announceStep(null, null), [])
 
   if (error) return <main className="page"><p className="error">{error}</p><Link to="/learn">Back to the hub</Link></main>
   if (!course) return <Loading />
