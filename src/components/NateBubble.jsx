@@ -4,7 +4,7 @@ import { useAuth } from '../lib/auth.jsx'
 import { supabase } from '../lib/supabase.js'
 import { currentCourseCode, languageOf } from '../lib/course.js'
 
-// ---------- Floating Nate: a small help chat (text only) for signed-in students on the learning pages ----------
+// ---------- Floating Nate (lower right): a small help chat (text only) for signed-in students on the learning pages ----------
 // Knows the course, the next lesson and the exercise on screen (the lesson page announces it with the
 // "nassau:step" event). Answers come from the "nate" edge function; the greeting is free.
 
