@@ -63,15 +63,28 @@ export function RolePlay({ step, c = {}, ad, f, lang, preview, onDone, onSkip })
   const [recMs, setRecMs] = useState(0)
   const recRef = useRef(null)                   // { recorder, stream, chunks, cancel, timer, tick }
   const playerRef = useRef(null)
+  const urlsRef = useRef(new Map())            // base64 → blob: URL (the site's security rules allow blob: audio, not data:)
+  const audioUrl = (b64) => {
+    let u = urlsRef.current.get(b64)
+    if (!u) {
+      const bin = atob(b64)
+      const bytes = new Uint8Array(bin.length)
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+      u = URL.createObjectURL(new Blob([bytes], { type: 'audio/mpeg' }))
+      urlsRef.current.set(b64, u)
+    }
+    return u
+  }
   const play = (b64) => {
     if (!b64) return
     try { playerRef.current?.pause() } catch { /* ignore */ }
-    const a = new Audio(`data:audio/mpeg;base64,${b64}`)
+    const a = new Audio(audioUrl(b64))
     playerRef.current = a
     a.play().catch(() => { /* autoplay blocked: the play button is there */ })
   }
   useEffect(() => () => {
     try { playerRef.current?.pause() } catch { /* ignore */ }
+    urlsRef.current.forEach(u => URL.revokeObjectURL(u))
     const r = recRef.current
     if (r) { r.cancel = true; try { r.recorder.stop() } catch { /* ignore */ } r.stream.getTracks().forEach(t => t.stop()); clearTimeout(r.timer); clearInterval(r.tick) }
   }, [])
