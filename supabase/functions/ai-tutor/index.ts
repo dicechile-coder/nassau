@@ -180,7 +180,8 @@ Deno.serve(async (req) => {
     if (action === "chat" && typeof body.audio === "string") {
       const bytes = fromB64(body.audio);
       if (bytes.length > MAX_AUDIO) return json({ error: "That recording is too long. Please keep it under 15 seconds." }, 400);
-      const names = [ad.persona, p.preferred_name, "Nassau", "Curaçao", "Jan", "Sofía", "Luis", "Maya", "Emma", "Ana", "Nate", "Carmen", "Diego"]
+      const names = [ad.persona, p.preferred_name, "Nassau", "Curaçao", "Punda", "Jan", "Sofía", "Luis", "Maya", "Emma", "Ana", "Nate",
+        ...(lang === "nl" ? ["Megan", "Rafael", "Valentina", "De Vries"] : lang === "es" ? ["Carmen", "Diego", "Lucía", "Valentina", "Rafael", "Megan"] : [])]
         .map(n => String(n ?? "").replace(/^(the|el)\s+/i, "").trim()).filter(n => n && n.length < 40);
       heard = await transcribe(xiKey, bytes, String(body.audio_type ?? "audio/webm"), lang, names);
       if (!heard) return json({ heard: "", retry: true, remaining: unlimited ? null : Math.max(limit - used, 0) });

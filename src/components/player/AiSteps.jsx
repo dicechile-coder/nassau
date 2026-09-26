@@ -18,11 +18,19 @@ const UI = {
         notHeard: 'Sorry, I couldn’t hear that. Please try again, a little closer to the microphone.', heard: 'Heard:',
         voiceOn: 'Voice replies on', voiceOff: 'Voice replies off', play: 'Play', cancel: 'Cancel', listening: 'listening…', done: 'Well done!', doneSub: 'Conversation complete', again: 'Finish', left: 'AI messages left today:',
         skip: 'Skip for now', you: 'You', finished: 'Conversation finished' },
-  nl: { online: 'en línea · online', typing: 'escribiendo… · typing…', tutor: 'con Nate · AI tutor', placeholder: 'Escribe en neerlandés… · Type in Dutch…',
-        mic: 'Pronto: mensajes de voz · Voice messages coming soon', done: 'Goed zo!', doneSub: 'Conversación completada · Conversation complete', again: 'Continuar · Continue',
+  nl: { online: 'en línea · online', typing: 'escribiendo… · typing…', tutor: 'con Nate · AI tutor', placeholder: 'Escribe o habla en neerlandés… · Type or speak Dutch…',
+        mic: 'Grabar un mensaje de voz · Record a voice message', recording: 'Grabando… toca ✓ para enviar · Recording… tap ✓ to send',
+        micDenied: 'Permite el micrófono en tu navegador para enviar mensajes de voz. · Please allow the microphone in your browser.',
+        notHeard: 'No te escuché bien. Inténtalo otra vez, más cerca del micrófono. · I couldn’t hear that. Please try again.', heard: 'Oído · Heard:',
+        voiceOn: 'Respuestas con voz: sí · Voice replies on', voiceOff: 'Respuestas con voz: no · Voice replies off', play: 'Escuchar · Play', cancel: 'Cancelar · Cancel',
+        listening: 'escuchando… · listening…', done: 'Goed zo!', doneSub: 'Conversación completada · Conversation complete', again: 'Continuar · Continue',
         left: 'Mensajes de IA hoy · AI messages left today:', skip: 'Saltar · Skip for now', you: 'Tú · You', finished: 'Conversación terminada · Chat finished' },
-  es: { online: 'online', typing: 'typt… · typing…', tutor: 'met Nate · AI tutor', placeholder: 'Schrijf in het Spaans… · Type in Spanish…',
-        mic: 'Binnenkort: spraakberichten · Voice messages coming soon', done: '¡Muy bien!', doneSub: 'Gesprek afgerond · Conversation complete', again: 'Verder · Continue',
+  es: { online: 'online', typing: 'typt… · typing…', tutor: 'met Nate · AI tutor', placeholder: 'Typ of spreek Spaans… · Type or speak Spanish…',
+        mic: 'Spraakbericht opnemen · Record a voice message', recording: 'Opnemen… tik op ✓ om te sturen · Recording… tap ✓ to send',
+        micDenied: 'Sta de microfoon toe in je browser om spraakberichten te sturen. · Please allow the microphone in your browser.',
+        notHeard: 'Ik kon je niet goed horen. Probeer het nog eens, dichter bij de microfoon. · I couldn’t hear that. Please try again.', heard: 'Gehoord · Heard:',
+        voiceOn: 'Antwoorden met stem: aan · Voice replies on', voiceOff: 'Antwoorden met stem: uit · Voice replies off', play: 'Afspelen · Play', cancel: 'Annuleren · Cancel',
+        listening: 'luistert… · listening…', done: '¡Muy bien!', doneSub: 'Gesprek afgerond · Conversation complete', again: 'Verder · Continue',
         left: 'AI-berichten vandaag · AI messages left today:', skip: 'Overslaan · Skip for now', you: 'Jij · You', finished: 'Gesprek afgelopen · Chat finished' },
 }
 
@@ -56,9 +64,9 @@ export function RolePlay({ step, c = {}, ad, f, lang, preview, onDone, onSkip })
   const [remaining, setRemaining] = useState(null)
   const chatRef = useRef(null)
   const inputRef = useRef(null)
-  // voice: English course first
-  const voiceOk = lang === 'en' && recMime() !== null && !!navigator.mediaDevices?.getUserMedia
-  const [speakOn, setSpeakOn] = useState(lang === 'en' && readPref())
+  // voice messages and spoken replies (all courses)
+  const voiceOk = recMime() !== null && !!navigator.mediaDevices?.getUserMedia
+  const [speakOn, setSpeakOn] = useState(readPref())
   const [rec, setRec] = useState(null)          // { started } while recording
   const [recMs, setRecMs] = useState(0)
   const recRef = useRef(null)                   // { recorder, stream, chunks, cancel, timer, tick }
@@ -109,7 +117,7 @@ export function RolePlay({ step, c = {}, ad, f, lang, preview, onDone, onSkip })
   const instruction = f(c.instruction || '')
 
   useEffect(() => {
-    aiChat(step.id, [], preview, { speak: lang === 'en' && readPref() })
+    aiChat(step.id, [], preview, { speak: readPref() })
       .then(r => { setMessages([{ role: 'tutor', text: r.reply, audio: r.audio, at: time() }]); setRemaining(r.remaining); play(r.audio) })
       .catch(e => setError(e.message))
       .finally(() => setBusy(false))
@@ -199,7 +207,7 @@ export function RolePlay({ step, c = {}, ad, f, lang, preview, onDone, onSkip })
           <div className="wa-name">{name}</div>
           <div className="wa-status">{rec ? ui.listening : busy ? ui.typing : `${ui.online} · ${ui.tutor}`}</div>
         </div>
-        {lang === 'en' && (
+        {(
           <button type="button" className={`wa-speak${speakOn ? ' on' : ''}`} onClick={toggleSpeak}
                   aria-pressed={speakOn} title={speakOn ? ui.voiceOn : ui.voiceOff} aria-label={speakOn ? ui.voiceOn : ui.voiceOff}>
             {speakOn
