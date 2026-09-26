@@ -6,7 +6,7 @@ const AVATARS = {
   jan: 'jan', 'sofía': 'sofia', sofia: 'sofia', luis: 'luis', maya: 'maya', emma: 'emma', ana: 'ana',
   'mr. martis': 'martis', martis: 'martis', 'the fruit seller': 'seller', seller: 'seller',
   'peter de vries': 'teacher', 'meneer de vries': 'teacher', valentina: 'valentina', rafael: 'rafael', megan: 'megan', 'oude man': 'oldman',
-  carmen: 'carmen', diego: 'diego', 'lucía': 'lucia', lucia: 'lucia', 'el vendedor': 'seller', vendedor: 'seller', 'señor': 'oldman',
+  nate: 'nate', carmen: 'carmen', diego: 'diego', 'lucía': 'lucia', lucia: 'lucia', 'el vendedor': 'seller', vendedor: 'seller', 'señor': 'oldman',
 }
 const DISPLAY = { 'Peter de Vries': 'Meneer De Vries', 'the fruit seller': 'Fruit seller' }
 const avatarFor = (p) => AVATARS[String(p || '').toLowerCase()]

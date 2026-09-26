@@ -125,7 +125,7 @@ export default function NateBubble() {
       {open && (
         <section className="nate-panel" role="dialog" aria-label={T.title}>
           <header className="nate-head">
-            <span className="nate-av" aria-hidden="true">N</span>
+            <img className="nate-av" src="/avatars/nate.webp" alt="" width="34" height="34" />
             <strong>{T.title}</strong>
             <button type="button" className="nate-x" onClick={() => setOpen(false)} aria-label={T.close}>×</button>
           </header>
@@ -157,7 +157,10 @@ export default function NateBubble() {
       {!open && peek && first && (
         <div className="nate-peek">
           <button type="button" className="nate-peek-x" onClick={() => { setPeek(false); saveSeen() }} aria-label={T.close}>×</button>
-          <button type="button" className="nate-peek-text" onClick={() => setOpen(true)}>{first.text.split('\n')[0]}</button>
+          <button type="button" className="nate-peek-text" onClick={() => setOpen(true)}>
+            <img src="/avatars/nate.webp" alt="" width="30" height="30" />
+            <span>{first.text.split('\n')[0]}</span>
+          </button>
         </div>
       )}
 
@@ -165,7 +168,12 @@ export default function NateBubble() {
               aria-expanded={open} aria-label={open ? T.close : T.open} title={T.open}>
         {open
           ? <span aria-hidden="true" className="nate-btn-x">×</span>
-          : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm3 6.5a1.5 1.5 0 1 0 0 .01zm5 0a1.5 1.5 0 1 0 0 .01zm5 0a1.5 1.5 0 1 0 0 .01z" /></svg>}
+          : <>
+              <img src="/avatars/nate.webp" alt="" width="56" height="56" />
+              <span className="nate-badge" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" /></svg>
+              </span>
+            </>}
       </button>
     </div>
   )
