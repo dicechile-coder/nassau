@@ -4,6 +4,7 @@
 //   action "library"  → { language?, accent?, gender?, age?, search? } → matching voices from the public
 //                        ElevenLabs Voice Library (read only; nothing is added to the account)
 //   action "test"     → { voice_id, text } → a short sample (base64 mp3), nothing is saved
+//   action "music"    → { prompt, length_ms?, model? } → an instrumental track from Eleven Music (base64 mp3), nothing is saved
 //   action "generate" → { id } → one audio_lines row: every part in its character's voice,
 //                        joined into one MP3, saved to audio/A1/…, and attached to the exercise
 //                        (ids starting with "NL-" use the Dutch voices "voices_nl" and go to audio/NL-A1/…,
@@ -87,6 +88,19 @@ Deno.serve(async (req) => {
         users: v.cloned_by_count, free_users_allowed: v.free_users_allowed,
         languages: (v.verified_languages ?? []).map((l: any) => `${l.language}${l.accent ? "/" + l.accent : ""}`),
       })) });
+    }
+
+    if (body.action === "music") {
+      const prompt = String(body.prompt ?? "").slice(0, 4000);
+      if (!prompt) return json({ error: "prompt needed" }, 400);
+      const ms = Math.min(180000, Math.max(10000, Number(body.length_ms) || 60000));
+      const r = await fetch(`${API}/music`, {
+        method: "POST",
+        headers: { "xi-api-key": key, "Content-Type": "application/json", Accept: "audio/mpeg" },
+        body: JSON.stringify({ prompt, music_length_ms: ms, force_instrumental: true, model_id: String(body.model ?? "music_v1") }),
+      });
+      if (!r.ok) return json({ error: `ElevenLabs ${r.status}: ${(await r.text()).slice(0, 300)}` }, 502);
+      return json({ audio: b64(new Uint8Array(await r.arrayBuffer())) });
     }
 
     if (body.action === "test") {
