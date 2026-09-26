@@ -165,10 +165,10 @@ export function TwoWays() {
     <div className="s-grid s-grid-2">
       <div className="s-card s-plan featured">
         <div className="s-plan-head"><h3>Self-study with Nate</h3><span className="s-badge green">Available now</span></div>
-        <p className="s-lead" style={{ fontSize: 18 }}>English now, then Dutch and Spanish. At your own pace, on any device.</p>
+        <p className="s-lead" style={{ fontSize: 18 }}>English, Dutch and Spanish. At your own pace, on any device.</p>
         <Checks items={['A story episode in every lesson', 'Interactive exercises with instant feedback', 'Role-play conversations with Nate, your AI tutor', 'Progress, streaks and a clear path per level']} />
         <div className="s-price"><strong>{price || 'Price soon'}</strong><span>{price ? 'per level half (A1.1)' : 'announced before launch'}</span></div>
-        <Link to="/signup" className="s-btn s-btn-primary">Try a free English lesson</Link>
+        <Link to="/signup" className="s-btn s-btn-primary">Try a free lesson</Link>
       </div>
       <div className="s-card s-plan">
         <div className="s-plan-head"><h3>With a real teacher</h3><span className="s-badge blue">Curaçao or online</span></div>
@@ -199,7 +199,7 @@ export function FinalCta() {
           <img src="/site/still-e16.webp" alt="" loading="lazy" />
           <div>
             <h2>Your first lesson is waiting.</h2>
-            <p>Try a free English lesson with Luis, Sofía, Maya and Jan, or book a free placement talk for Dutch, English or Spanish.</p>
+            <p>Try a free lesson in English, Dutch or Spanish, or book a free placement talk for Dutch, English or Spanish.</p>
             <div className="s-btns">
               <Link to="/signup" className="s-btn s-btn-primary">Try a free lesson</Link>
               <Link to="/placement" className="s-btn s-btn-white">Book a placement talk</Link>

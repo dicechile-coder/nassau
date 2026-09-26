@@ -9,9 +9,10 @@ export const LANGUAGES = {
       ['General Dutch', 'teacher'],
       ['NT2, Dutch as a second language', 'teacher'],
       ['Naturalization exam prep', 'teacher'],
-      ['Self-study with Nate', 'next'],
+      ['Self-study with Nate', 'now'],
     ],
     tracks: [
+      ['Self-study with Nate', 'Story episodes, interactive exercises and role-play conversations, with help in Spanish and English. Level A1.1 is available now.'],
       ['General Dutch', 'Everyday conversation, reading and writing for life, work and study, from A1 to C2.'],
       ['NT2 — Dutch as a second language', 'For integration in a Dutch-speaking environment: shops, appointments, official letters and forms, work.'],
       ['Dutch Naturalization exam prep', 'Structured, repeatable practice for every skill tested: speaking, reading, writing and listening.'],
@@ -41,9 +42,10 @@ export const LANGUAGES = {
       ['General Spanish', 'teacher'],
       ['Group or private classes', 'teacher'],
       ['Business Spanish', 'teacher'],
-      ['Self-study with Nate', 'later'],
+      ['Self-study with Nate', 'now'],
     ],
     tracks: [
+      ['Self-study with Nate', 'Latin American Spanish for everyday life in Curaçao, with story episodes, exercises and role-play conversations. Help in Dutch and English. Level A1.1 is available now.'],
       ['General Spanish', 'Everyday conversation, reading and writing, from A1 to C2.'],
       ['Group or private classes', 'Live classes with a teacher, in Curaçao or online, with the online platform between classes.'],
       ['Business Spanish', 'For work with Spanish-speaking colleagues, clients and partners.'],
@@ -77,8 +79,8 @@ export const A1_MODULES = [
 ]
 
 export const FAQ = [
-  ['Which languages can I learn?', 'Dutch (including NT2 and Naturalization exam prep), English and Spanish, from A1 to C2 with a teacher. Self-study with Nate starts with English; Dutch comes next, then Spanish.'],
-  ['Is the first lesson really free?', 'Yes. Lesson 1 of our English self-study course is free after a quick sign-up. No credit card, no automatic payments. For Dutch and Spanish, the placement talk with a teacher is free.'],
+  ['Which languages can I learn?', 'Dutch (including NT2 and Naturalization exam prep), English and Spanish, from A1 to C2 with a teacher. Self-study with Nate is available for all three, starting at level A1.1.'],
+  ['Is the first lesson really free?', 'Yes. Lesson 1 of each self-study course (English, Dutch and Spanish) is free after a quick sign-up. No credit card, no automatic payments. The placement talk with a teacher is free too.'],
   ['What level do I need?', 'None. Level A1 starts from zero. Not sure where you belong? Book a free placement talk with a teacher.'],
   ['Who is Nate?', 'Nate is the AI tutor inside every self-study lesson. You chat with him in the language you are learning; he corrects you gently and explains in simple words. Today you type; spoken conversations are coming.'],
   ['Can I learn with a real teacher instead?', 'Yes. Group classes, private lessons and exam preparation for Dutch, English and Spanish, in Curaçao or online.'],

@@ -67,9 +67,8 @@ export function CoursePage() {
       <PageHero kicker={l.native} title={`Learn ${l.name} at Nassau Academy`}>
         <p className="s-lead">{l.hero}</p>
         <div className="s-btns">
-          {isEnglish
-            ? <Link to="/signup" className="s-btn s-btn-primary">Try a free lesson <IconArrow size={20} /></Link>
-            : <Link to="/placement" className="s-btn s-btn-primary">Book a free placement talk</Link>}
+          <Link to="/signup" className="s-btn s-btn-primary">Try a free lesson <IconArrow size={20} /></Link>
+          {!isEnglish && <Link to="/placement" className="s-btn s-btn-outline">Book a free placement talk</Link>}
           {SITE.levelTests?.[lang] && <Link to={`/level-test/${lang}`} className="s-btn s-btn-outline">Take the level test</Link>}
           {isEnglish
             ? <Link to="/placement" className="s-btn s-btn-outline">Book a placement talk</Link>
@@ -79,7 +78,7 @@ export function CoursePage() {
 
       <section className="s-section" style={{ paddingTop: 72 }}>
         <div className="s-wrap">
-          <div className="s-grid s-grid-3">
+          <div className={`s-grid ${l.tracks.length === 4 ? 's-grid-2' : 's-grid-3'}`}>
             {l.tracks.map(([t, d]) => (
               <div key={t} className="s-card s-feature"><h3 className="s-h3">{t}</h3><p className="s-text">{d}</p></div>
             ))}
@@ -176,11 +175,11 @@ export function HowItWorks() {
 
 /* ------------------------------- Pricing ------------------------------- */
 export function Pricing() {
-  usePageMeta('Pricing', 'Self-study with Nate or live classes with a teacher. Try a free English lesson or book a free placement talk.')
+  usePageMeta('Pricing', 'Self-study with Nate or live classes with a teacher. Try a free lesson in English, Dutch or Spanish, or book a free placement talk.')
   return (
     <>
       <PageHero center kicker="Pricing" title="Clear prices. No surprises.">
-        <p className="s-lead">Start with a free English lesson or a free placement talk. No credit card, no automatic payments.</p>
+        <p className="s-lead">Start with a free lesson or a free placement talk. No credit card, no automatic payments.</p>
       </PageHero>
       <section className="s-section" style={{ paddingTop: 64 }}><div className="s-wrap"><TwoWays /></div></section>
       <section className="s-section">
@@ -240,10 +239,10 @@ export function Placement() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
               <span className="s-kicker">Request your talk</span>
               <h2 className="s-h2" style={{ fontSize: 'clamp(30px, 3.6vw, 44px)' }}>We’ll contact you within 1–2 working days.</h2>
-              <p className="s-lead">Learning English on your own? You can also skip the talk and start with a free lesson right away.</p>
+              <p className="s-lead">Learning on your own? You can also skip the talk and start with a free lesson right away.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <Link to="/level-test/dutch" className="s-link-arrow">Learning Dutch? Take the level test first <IconArrow size={18} /></Link>
-                <Link to="/signup" className="s-link-arrow">Try a free English lesson <IconArrow size={18} /></Link>
+                <Link to="/signup" className="s-link-arrow">Try a free lesson <IconArrow size={18} /></Link>
               </div>
             </div>
             <div className="s-form-card"><MessageForm kind="placement" submitLabel="Request my placement talk" /></div>
